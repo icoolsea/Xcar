@@ -8,14 +8,18 @@
 
 #include <vlc/vlc.h>
 
+#include "CtrlComm.h"
+
 #include <QtWidgets>
 //#include <QX11EmbedContainer>
+#include <QLabel>
 
 class QVBoxLayout;
 class QPushButton;
 class QTimer;
 class QFrame;
 class QSlider;
+
 
 #define POSITION_RESOLUTION 10000
 
@@ -39,6 +43,8 @@ protected:
 };
 
 
+
+
 class Player : public QWidget
 {
     Q_OBJECT
@@ -60,6 +66,10 @@ class Player : public QWidget
     QDial *dial_;
 
     Thread thread_;
+    CtrlComm ctrlCommThread_;
+
+
+    QLabel *commInfo_;
 
 public:
     Player();
@@ -71,7 +81,7 @@ public slots:
     void updateInterface();
     void changeVolume(int newVolume);
     void changePosition(int newPosition);
-    void setValueXXX(int value);
+    void setValueXXX(char value);
 
 };
 

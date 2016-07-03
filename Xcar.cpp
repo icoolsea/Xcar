@@ -5,6 +5,11 @@
 
 #include "Xcar.h"
 
+#include "CtrlComm.h"
+
+#include <sys/stat.h>
+
+
 //#include <QX11EmbedContainer>
 #include <QVBoxLayout>
 #include <QPushButton>
@@ -13,6 +18,8 @@
 #include <QFrame>
 
 #include <QDial>
+#include <QLabel>
+#include <QThread>
 
 Player::Player()
 : QWidget()
@@ -22,7 +29,7 @@ Player::Player()
               "--verbose=2", //be much more verbose then normal for debugging purpose
               "--plugin-path=C:\\vlc-0.9.9-win32\\plugins\\" };
 
-#ifdef Q_WS_X11    
+#ifdef Q_WS_X11
     _videoWidget=new QX11EmbedContainer(this);
 #else
     _videoWidget=new QFrame(this);
@@ -50,30 +57,40 @@ Player::Player()
     dial_->setNotchesVisible(true);
     // connect(dl[0],SIGNAL(valueChanged(int)),this,SLOT(changedDate()));
 
+
+    commInfo_ = new QLabel("test serialPort...");
+
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(_videoWidget);
     layout->addWidget(_positionSlider);
     layout->addWidget(_volumeSlider);
-    layout->addWidget(dial_);
+//    layout->addWidget(dial_);
+    layout->addWidget(commInfo_);
     setLayout(layout);
 
     _isPlaying=false;
     poller=new QTimer(this);
 
     //create a new libvlc instance
-    _vlcinstance=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);  //tricky calculation of the char space used
-    
-    // Create a media player playing environement 
-    _mp = libvlc_media_player_new (_vlcinstance);
+//@    _vlcinstance=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);  //tricky calculation of the char space used
+//    _vlcinstance=libvlc_new(0, NULL);  //tricky calculation of the char space used
+
+   // while (1) {};
+    // Create a media player playing environement
+   //@ _mp = libvlc_media_player_new (_vlcinstance);
 
     // Object obj;
     QObject::connect(&thread_, SIGNAL (aSignal(int)), dial_, SLOT (setValue(int)));
     thread_.start();
 
+    //Serial Thread
+     QObject::connect(&ctrlCommThread_, SIGNAL (sSignal(char)), this, SLOT (setValueXXX(char)));
+     ctrlCommThread_.start();
+
     //connect the two sliders to the corresponding slots (uses Qt's signal / slots technology)
-    connect(poller, SIGNAL(timeout()), this, SLOT(updateInterface()));
-    connect(_positionSlider, SIGNAL(sliderMoved(int)), this, SLOT(changePosition(int)));
-    connect(_volumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(changeVolume(int)));
+ //   connect(poller, SIGNAL(timeout()), this, SLOT(updateInterface()));
+   // connect(_positionSlider, SIGNAL(sliderMoved(int)), this, SLOT(changePosition(int)));
+   //@ connect(_volumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(changeVolume(int)));
 
     // connect(_positionSlider, SIGNAL(changedxxx(int)), dial_, SLOT(setValue(int)));
 
@@ -82,9 +99,15 @@ Player::Player()
     poller->start(100); //start timer to trigger every 100 ms the updateInterface slot
 }
 
-void Player::setValueXXX(int x)
+void Player::setValueXXX(char x)
 {
-    printf("@@@@@@@@@@@@@@@@@@ %d\n", x);
+//    printf("@@@@@@@@@@@@@@@@@@ %x\n", x);
+
+//    QString s = QString::number(x, 10);
+    QString t = QString::number(x, 16).toUpper();
+
+
+    commInfo_->setText(t);
 }
 
 //desctructor
@@ -101,6 +124,8 @@ Player::~Player()
 
 void Player::playFile(QString file)
 {
+
+#if 0
     //the file has to be in one of the following formats /perhaps a little bit outdated)
     /*
     [file://]filename              Plain media file
@@ -115,9 +140,10 @@ void Player::playFile(QString file)
     */
 
     /* Create a new LibVLC media descriptor */
+  //  _m = libvlc_media_new_path(_vlcinstance, file.toStdString().c_str());
     _m = libvlc_media_new_path(_vlcinstance, file.toStdString().c_str());
 
-//     _m = libvlc_media_new_location (_vlcinstance, "http://192.168.8.1:8083/?action=stream");
+ //    _m = libvlc_media_new_location (_vlcinstance, "http://192.168.8.1:8083/?action=stream");
 
     libvlc_media_player_set_media (_mp, _m);
 
@@ -149,7 +175,7 @@ void Player::playFile(QString file)
 
     /* Play */
     libvlc_media_player_play (_mp);
-
+#endif
     _isPlaying=true;
 }
 

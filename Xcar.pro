@@ -14,13 +14,18 @@ INCLUDEPATH += .
 
 QT += widgets
 
-LIBS += -lvlc
+LIBS += -lvlc -lwiringPi  -lwiringPiDev
 
 # Input
 HEADERS += \
-    Xcar.h
+    Xcar.h \
+    CtrlComm.h
+ #   SerialThread.h
+
+
 SOURCES += main.cpp \
     Xcar.cpp
+  #  Serialthread.cpp
 
 
 
