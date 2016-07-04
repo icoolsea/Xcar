@@ -12,9 +12,9 @@ INSTALLS += target
 
 INCLUDEPATH += .
 
-QT += widgets
+QT += widgets network
 
-LIBS += -lvlc -lwiringPi  -lwiringPiDev
+LIBS += -lvlc -lwiringPi
 
 # Input
 HEADERS += \
@@ -24,7 +24,8 @@ HEADERS += \
 
 
 SOURCES += main.cpp \
-    Xcar.cpp
+    Xcar.cpp \
+    Ctrlcomm.cpp
   #  Serialthread.cpp
 
 
