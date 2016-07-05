@@ -12,7 +12,7 @@ INSTALLS += target
 
 INCLUDEPATH += .
 
-QT += widgets network
+QT += widgets network serialport
 
 LIBS += -lvlc -lwiringPi
 
