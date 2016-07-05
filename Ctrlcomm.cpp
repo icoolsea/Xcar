@@ -1,100 +1,138 @@
 #include "CtrlComm.h"
+#include "Log.h"
+
+#include <QtWidgets>
+
+static const int timeOut = 1000;
+
 
 CtrlComm::CtrlComm() : isConnected_(false)
 {
 
 }
 
-// --------------- Serial Port ------------------
 
 CtrlComm::~CtrlComm() {
-        serialClose(serialPortFd_);
-        delete carSocket_;
+    serialClose(serialPortFd_);
+    delete carSocket_;
 }
 
 void CtrlComm::run() {
 
-        openComm();
+    openComm();
 
-        carSocket_ = new QTcpSocket();
-        connect(carSocket_, SIGNAL(connected()), this, SLOT(connectedSlot()));
-        connect(carSocket_, SIGNAL(disconnected()), this, SLOT(disconnectedSlot()));
-        connect(carSocket_, SIGNAL(readyRead()), this, SLOT(readyReadSlot()));
-        connect(carSocket_, SIGNAL(error(QAbstractSocket::SocketError)), this,
-                SLOT(errorSlot(QAbstractSocket::SocketError)));
+    carSocket_ = new QTcpSocket();
 
+    connect(carSocket_, SIGNAL(connected()), this, SLOT(connectedSlot()), Qt::DirectConnection);
+    connect(carSocket_, SIGNAL(disconnected()), this, SLOT(disconnectedSlot()), Qt::DirectConnection);
+    connect(carSocket_, SIGNAL(readyRead()), this, SLOT(readyReadSlot()), Qt::DirectConnection);
+    connect(carSocket_, SIGNAL(error(QAbstractSocket::SocketError)), this,
+            SLOT(errorSlot(QAbstractSocket::SocketError)), Qt::DirectConnection);
 
-        carSocket_->connectToHost("127.0.0.1", 2001);
-        isConnected_ = true;
+    connect(this, SIGNAL(sendToServerSignal(char)), this,
+            SLOT(sendToServer(char)), Qt::DirectConnection);
 
+    connectToServer("127.0.0.1", 2001);
 
-        while (true) {
-                char tmp;
-                memset(&tmp, '0x00', 1);
-                tmp = serialGetchar (serialPortFd_) ;
-                // printf("@: %x\n", tmp);
+    while (true) {
+        char tmp;
+        memset(&tmp, '0x00', 1);
+        //    tmp = serialGetchar (serialPortFd_) ;
+        // printf("@: %x\n", tmp);
+        sleep(10);
 
-                int f;
-                if (tmp != -1 && isConnected_) {
-                        f = carSocket_->write(&tmp, 1);
-                        carSocket_->waitForBytesWritten(1000);
-                        printf("send ...: %c !\n", tmp);
-                }else
-                       ;// printf("not connected !\n");
-                //if (tmp != -1)
-                //   serialPutchar(fd, tmp);
-                //                    emit sSignal(tmp);
-        }
+        tmp = '3';
 
-        closeComm();
+        int f;
+        if (tmp != -1 && isConnected_) {
+//            f = sendToServer(tmp);
+            emit sendToServerSignal(tmp);
+            printf("send ...: %c !\n", tmp);
+        }else
+            ;// printf("not connected !\n");
+        //if (tmp != -1)
+        //   serialPutchar(fd, tmp);
+        //                    emit sSignal(tmp);
+    }
+
+    closeComm();
 }
 
 void CtrlComm::openComm()
 {
-        if ((serialPortFd_ = serialOpen ("/dev/ttyAMA0", 115200)) < 0)
-        {
-                printf("open failed !\n\n");
-                //TODO send signal tor xcar.cpp, then show the error
-                return  ;
-        }
+    if ((serialPortFd_ = serialOpen ("/dev/ttyAMA0", 115200)) < 0)
+    {
+        printf("open failed !\n\n");
+        //TODO send signal tor xcar.cpp, then show the error
+        return  ;
+    }
 }
 
 //may never be called
 void CtrlComm::closeComm() {
-        serialClose(serialPortFd_);
+    serialClose(serialPortFd_);
 }
 
 
 // --------------- network ------------------
 
+int CtrlComm::connectToServer(const char * ip, int port)
+{
+    if (isConnected_)
+        return 0;
+
+    carSocket_->abort();
+    carSocket_->connectToHost(ip, port);
+    carSocket_->waitForConnected(timeOut);
+
+    LOG_DEBUG<<"connecting to server..."<<endl;
+
+}
+
+int CtrlComm::sendToServer(char data)
+{
+    char tmp = data;
+    carSocket_->write(&tmp, 1);
+    carSocket_->waitForBytesWritten(timeOut);
+
+    LOG_DEBUG<<"send msg to server"<<data<<endl;
+
+}
+
 void CtrlComm::connectedSlot()
 {
+    isConnected_ = true;
 
-        isConnected_ = true;
-        printf("@@@@@@@@@@@@@@@@@@@@@@@  ok\n");
+    LOG_DEBUG<<"connect to server success !\n";
 }
 
 void CtrlComm::disconnectedSlot()
 {
-        isConnected_ = false;
-        carSocket_->close();
+    carSocket_->close();
+    isConnected_ = false;
+
+    LOG_DEBUG<<"disconnect from server ... \n";
 }
 
 void CtrlComm::readyReadSlot()
 {
-        QByteArray message = carSocket_->readAll();
-        carSocket_->waitForReadyRead(1000);
-        printf("%s\n", message.toStdString().c_str());
-        //    QMessageBox::information(this, "show", message);
+    while (carSocket_->bytesAvailable() < 1) {
+        if (!carSocket_->waitForReadyRead(timeOut))
+            return;
+        }
 
-        //TODO
-        //ui->recvEdit->append(message);
+    QByteArray message = carSocket_->read(1024);
+  //  carSocket_->waitForReadyRead(timeOut);
+
+    LOG_DEBUG<<"read msg from server"<<message<<endl;
 }
 
 void CtrlComm::errorSlot(QAbstractSocket::SocketError)
 {
-        //TODO send to xcar
-        //    QMessageBox::information(this, "show", carSocket_->errorString());
-        disconnectedSlot();
+    LOG_ERROR<<"socket error !\n";
+
+    disconnectedSlot();
+    sleep(1);
+    connectToServer("127.0.0.1", 2001);
 }
 

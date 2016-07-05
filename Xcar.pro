@@ -19,7 +19,8 @@ LIBS += -lvlc -lwiringPi
 # Input
 HEADERS += \
     Xcar.h \
-    CtrlComm.h
+    CtrlComm.h \
+    Log.h
  #   SerialThread.h
 
 

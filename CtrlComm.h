@@ -18,6 +18,7 @@ class CtrlComm : public QThread
 Q_OBJECT
 signals:
     void sSignal(char value);
+    void sendToServerSignal(char value);
 
 protected:
     void run();
@@ -39,8 +40,13 @@ private slots:
     void readyReadSlot();
     void errorSlot(QAbstractSocket::SocketError);
 
+    int sendToServer(char data);
+
 
 private:
+    int connectToServer(const char * ip, int port);
+
+
     int serialPortFd_;
 
     QTcpSocket *carSocket_;
