@@ -35,79 +35,129 @@ Player::Player()
     _videoWidget=new QFrame(this);
 #endif   
 
-    _volumeSlider=new QSlider(Qt::Horizontal,this);
-    _volumeSlider->setMaximum(100); //the volume is between 0 and 100
-    _volumeSlider->setToolTip("Audio slider");
-
-    // Note: if you use streaming, there is no ability to use the position slider
-    _positionSlider=new QSlider(Qt::Horizontal,this); 
-    _positionSlider->setMaximum(POSITION_RESOLUTION);
-
-    dial_ = new QDial;
-    //dial_->setFocusPolicy(Qt::StrongFocus);
+    commInfo_ = new QLabel("ffff");
+    commInfo2_ = new QLabel("           距离 10 (m)");
+    commInfo3_ = new QLabel("           温度 32 (摄氏度)");
 
 
-    dial_->setRange(1, 100);
-    //dial_->setGeometry(30, 30, 100, 100);
-    // dial_->setInvertedControls(false);
-    // dial_->setInvertedAppearance(true);
+    QLabel *tt1 =new QLabel("电压 10 (V)");
+    QLabel *tt2 =new QLabel("电压 10 (V)");
+    QLabel *tt3 = new QLabel("车体角度");
+    QLabel *tt4 = new QLabel("驼机角度");;
 
 
-    // 显示刻度
-    dial_->setNotchesVisible(true);
-    // connect(dl[0],SIGNAL(valueChanged(int)),this,SLOT(changedDate()));
+    km_ = new Form_KM(this);
+    km2_ = new Form_KM(this);
+
+    QGridLayout *topl= new  QGridLayout;
+
+    QLabel *tt8 = new QLabel("");
+        topl->addWidget(tt8, 0, 0);
 
 
-    commInfo_ = new QLabel("test serialPort...");
+    QGridLayout *vl1= new  QGridLayout;
+    vl1->addWidget(km_, 0, 0);
+    vl1->addWidget(tt3, 1, 0);
+    vl1->addWidget(tt1, 2, 0);
 
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(_videoWidget);
-    layout->addWidget(_positionSlider);
-    layout->addWidget(_volumeSlider);
-//    layout->addWidget(dial_);
-    layout->addWidget(commInfo_);
-    setLayout(layout);
+//    QLabel *tt5 = new QLabel("");
+//        vl1->addWidget(tt5, 0, 0);
+
+
+    QGridLayout *vl2= new QGridLayout;
+    vl2->addWidget(km2_,0,0);
+    vl2->addWidget(tt4,1,0);
+    vl2->addWidget(tt2,2,0);
+
+//    QLabel *tt6 = new QLabel("");
+//        vl1->addWidget(tt6, 0, 0);
+
+
+
+    QVBoxLayout *vlv= new QVBoxLayout;
+
+    vlv->addWidget(_videoWidget, 0, 0);
+
+
+   // newLayout->addWidget(km_, 0, 0);
+   // newLayout->addWidget(_videoWidget, 0, 1);
+   // newLayout->addWidget(km2_, 0, 2);
+
+
+
+    QHBoxLayout *hl = new QHBoxLayout;
+
+
+    hl->addWidget(commInfo_,0);
+    hl->addWidget(commInfo2_,1);
+    hl->addWidget(commInfo3_,2);
+
+        QGridLayout *newLayout = new QGridLayout;
+
+
+  //  newLayout->addLayout(topl,0,1);
+    newLayout->addLayout(vl1,0,0);
+    newLayout->addLayout(vl2,0,2);
+    newLayout->addLayout(vlv,0,1);
+
+    newLayout->addLayout(hl,1,1);
+
+    newLayout->setColumnStretch(0, 1);
+    newLayout->setColumnStretch(1,3);
+    newLayout->setColumnStretch(2,1);
+
+
+    newLayout->setRowStretch(0,6);
+    newLayout->setRowStretch(1,1);
+ //   newLayout->setRowStretch(2,1);
+
+
+    setLayout(newLayout);
+
+   // QVBoxLayout *layout = new QVBoxLayout;
+   // layout->addWidget(_videoWidget);
+   // layout->addWidget(commInfo_,30,Qt::AlignLeft);
+  //  setLayout(layout);
+
+   // km_->setGeometry(110,120,400,255);
+    //km_->show();
+
+    connect(&testTimer,SIGNAL(timeout()),this,SLOT(change_Speed()));
+    testTimer.start(10);
+
 
     _isPlaying=false;
     poller=new QTimer(this);
 
     //create a new libvlc instance
-//@    _vlcinstance=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);  //tricky calculation of the char space used
+    _vlcinstance=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);  //tricky calculation of the char space used
 //    _vlcinstance=libvlc_new(0, NULL);  //tricky calculation of the char space used
 
    // while (1) {};
     // Create a media player playing environement
-   //@ _mp = libvlc_media_player_new (_vlcinstance);
+    _mp = libvlc_media_player_new (_vlcinstance);
 
     // Object obj;
-    QObject::connect(&thread_, SIGNAL (aSignal(int)), dial_, SLOT (setValue(int)));
+    QObject::connect(&thread_, SIGNAL (aSignal(int)), this, SLOT (setValueXXX(int)));
     thread_.start();
 
     //Serial Thread
      QObject::connect(&ctrlCommThread_, SIGNAL (sSignal(char)), this, SLOT (setValueXXX(char)));
      ctrlCommThread_.start();
 
-    //connect the two sliders to the corresponding slots (uses Qt's signal / slots technology)
- //   connect(poller, SIGNAL(timeout()), this, SLOT(updateInterface()));
-   // connect(_positionSlider, SIGNAL(sliderMoved(int)), this, SLOT(changePosition(int)));
-   //@ connect(_volumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(changeVolume(int)));
-
-    // connect(_positionSlider, SIGNAL(changedxxx(int)), dial_, SLOT(setValue(int)));
-
+    connect(poller, SIGNAL(timeout()), this, SLOT(updateInterface()));
 
 
     poller->start(100); //start timer to trigger every 100 ms the updateInterface slot
 }
 
-void Player::setValueXXX(char x)
+void Player::setValueXXX(int x)
 {
-//    printf("@@@@@@@@@@@@@@@@@@ %x\n", x);
 
-//    QString s = QString::number(x, 10);
     QString t = QString::number(x, 16).toUpper();
 
-
-    commInfo_->setText(t);
+    QString tmp = "速度"" " + t + "m/s";
+    commInfo_->setText(tmp);
 }
 
 //desctructor
@@ -125,22 +175,8 @@ Player::~Player()
 void Player::playFile(QString file)
 {
 
-#if 0
-    //the file has to be in one of the following formats /perhaps a little bit outdated)
-    /*
-    [file://]filename              Plain media file
-    http://ip:port/file            HTTP URL
-    ftp://ip:port/file             FTP URL
-    mms://ip:port/file             MMS URL
-    screen://                      Screen capture
-    [dvd://][device][@raw_device]  DVD device
-    [vcd://][device]               VCD device
-    [cdda://][device]              Audio CD device
-    udp:[[<source address>]@[<bind address>][:<bind port>]]
-    */
 
     /* Create a new LibVLC media descriptor */
-  //  _m = libvlc_media_new_path(_vlcinstance, file.toStdString().c_str());
     _m = libvlc_media_new_path(_vlcinstance, file.toStdString().c_str());
 
  //    _m = libvlc_media_new_location (_vlcinstance, "http://192.168.8.1:8083/?action=stream");
@@ -171,7 +207,7 @@ void Player::playFile(QString file)
         int windid = _videoWidget->winId();
         libvlc_media_player_set_xwindow (_mp, windid );
 
-    #endif
+
 
     /* Play */
     libvlc_media_player_play (_mp);
@@ -210,10 +246,18 @@ void Player::updateInterface()
 
     float pos=libvlc_media_player_get_position (_mp);
     int siderPos=(int)(pos*(float)(POSITION_RESOLUTION));
-    _positionSlider->setValue(siderPos);
+    //_positionSlider->setValue(siderPos);
     int volume=libvlc_audio_get_volume (_mp);
-    _volumeSlider->setValue(volume);
+    //_volumeSlider->setValue(volume);
 
+}
+
+
+static float temp = 0.0;
+void Player::change_Speed()
+{
+    temp = temp + 0.5;
+    km_->change_Speed(temp);
 }
 
 

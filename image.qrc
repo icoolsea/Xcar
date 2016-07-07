@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/KM">
+        <file>Images/Km/Km_background.png</file>
+        <file>Images/Km/Point.png</file>
+        <file>Images/Km/pointhover.png</file>
+    </qresource>
+</RCC>

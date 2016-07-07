@@ -9,10 +9,12 @@
 #include <vlc/vlc.h>
 
 #include "CtrlComm.h"
+#include "form_km.h"
 
 #include <QtWidgets>
 //#include <QX11EmbedContainer>
 #include <QLabel>
+#include <QTimer>
 
 class QVBoxLayout;
 class QPushButton;
@@ -48,8 +50,8 @@ protected:
 class Player : public QWidget
 {
     Q_OBJECT
-    QSlider *_positionSlider;
-    QSlider *_volumeSlider;
+  //  QSlider *_positionSlider;
+  //  QSlider *_volumeSlider;
 
 #ifdef Q_WS_X11    
     QX11EmbedContainer *_videoWidget;
@@ -63,13 +65,25 @@ class Player : public QWidget
     libvlc_media_player_t *_mp;
     libvlc_media_t *_m;
 
-    QDial *dial_;
+    //QDial *dial_;
 
     Thread thread_;
     CtrlComm ctrlCommThread_;
 
 
     QLabel *commInfo_;
+
+    QLabel *commInfo2_;
+
+    QLabel *commInfo3_;
+
+
+
+    Form_KM *km_;
+    Form_KM *km2_;
+
+    QTimer testTimer;
+
 
 public:
     Player();
@@ -81,7 +95,10 @@ public slots:
     void updateInterface();
     void changeVolume(int newVolume);
     void changePosition(int newPosition);
-    void setValueXXX(char value);
+    void setValueXXX(int value);
+
+    void change_Speed();
+
 
 };
 

@@ -20,14 +20,26 @@ LIBS += -lvlc -lwiringPi
 HEADERS += \
     Xcar.h \
     CtrlComm.h \
-    Log.h
+    Log.h \
+    form_km.h \
+    SerialThread.h
  #   SerialThread.h
 
 
 SOURCES += main.cpp \
     Xcar.cpp \
-    Ctrlcomm.cpp
+    Ctrlcomm.cpp \
+    form_km.cpp \
+    Serialthread.cpp
   #  Serialthread.cpp
+
+RESOURCES += \
+    image.qrc
+
+FORMS += \
+    form_km.ui
+
+DISTFILES +=
 
 
 
