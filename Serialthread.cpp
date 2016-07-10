@@ -1,4 +1,5 @@
 #include "SerialThread.h"
+#include "Log.h"
 
 static QSerialPort::BaudRate getBaudRate(int baudRate)
 
@@ -28,7 +29,7 @@ static QSerialPort::BaudRate getBaudRate(int baudRate)
 
 
 bool SerialThread::isOpen() const{
-    return isOpen_;
+        return isOpen_;
 }
 
 //"/dev/ttyS0"
@@ -37,7 +38,6 @@ void SerialThread::setPortName(const QString &name)
         m_portName = name;
 }
 
-//用来获取串口的名字
 QString SerialThread::portName() const
 {
         return m_portName;
@@ -65,9 +65,14 @@ bool SerialThread::open()
         m_serialPort->setFlowControl(QSerialPort::NoFlowControl);
         m_serialPort->setReadBufferSize(1024);
 
-        isOpen_ = true;
 
-        return m_serialPort->open(QSerialPort::ReadWrite);
+        if (m_serialPort->open(QSerialPort::ReadWrite))
+        {
+            isOpen_ = true;
+            return true;
+        }
+
+        return false;
 }
 
 //用来关闭串口
@@ -95,28 +100,32 @@ bool SerialThread::clear()
 //用来接收串口发来的数据
 int SerialThread::readData(char *buffer, int count, int timeout)
 {
-
         int len = 0;
 
+ //qDebug("1 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx %d\n", count);
         forever
         {
+ //qDebug("2 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx %d, %d\n", count, len);
                 int n = m_serialPort->read(&buffer[len], count - len);
                 if (n == -1)
                 {
+ //qDebug("3 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx %d\n", count);
                         return -1;
                 }
-
                 else if (n == 0 && !m_serialPort->waitForReadyRead(timeout))
                 {
+ //qDebug("4 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
                         return -2;
                 }
                 else
                 {
+ //qDebug("5 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
                         len += n;
                         if (count == len)
                                 break;
                 }
         }
+ //qDebug("6 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
 
         return len;
 }

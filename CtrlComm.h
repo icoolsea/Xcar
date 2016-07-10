@@ -1,16 +1,11 @@
 #ifndef CTRLCOMM_
 #define CTRLCOMM_
 
-
-#include <QDebug>
 #include <QThread>
 #include <QtNetwork/QTcpSocket>
+#include <QByteArray>
 
-
-//#include "SerialThread.h"
-
-#include <wiringSerial.h>
-#include <wiringPi.h>
+#include "SerialThread.h"
 
 
 class CtrlComm : public QThread
@@ -18,7 +13,7 @@ class CtrlComm : public QThread
 Q_OBJECT
 signals:
     void sSignal(char value);
-    void sendToServerSignal(char value);
+    void sendToServerSignal(QByteArray);
 
 protected:
     void run();
@@ -40,17 +35,18 @@ private slots:
     void readyReadSlot();
     void errorSlot(QAbstractSocket::SocketError);
 
-    int sendToServer(char data);
+    int sendToServer(QByteArray data);
 
 
 private:
     int connectToServer(const char * ip, int port);
 
 
-    int serialPortFd_;
-
     QTcpSocket *carSocket_;
     bool isConnected_;
+
+    SerialThread *serial_;
+    QByteArray serialArray_;
 
 };
 

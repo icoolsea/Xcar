@@ -1,11 +1,10 @@
 #ifndef SERIAL
 #define SERIAL
 
-#include <QThread>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 
-class SerialThread : public QThread
+class SerialThread:QObject
 {
 Q_OBJECT
 signals:
@@ -32,7 +31,7 @@ public:
 
     virtual bool clear();
 
-    int readData(char *buffer, int count, int timeout = 1000);
+    int readData(char *buffer, int count, int timeout = 100);
 
     int writeData(char *data, int size);
 

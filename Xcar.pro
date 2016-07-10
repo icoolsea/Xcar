@@ -14,7 +14,6 @@ INCLUDEPATH += .
 
 QT += widgets network serialport
 
-LIBS +=  -lwiringPi
 
 # Input
 HEADERS += camclient.h \
