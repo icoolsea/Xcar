@@ -2,6 +2,8 @@
  * Copyright © 2016 wjj <icoolsea@hotmail.com>
  */
 
+#include "camclient.h"
+
 
 #ifndef XCAR_H
 #define XCAR_H
@@ -10,6 +12,7 @@
 
 #include "CtrlComm.h"
 #include "form_km.h"
+#include "ui_mainwindow.h"
 
 #include <QtWidgets>
 //#include <QX11EmbedContainer>
@@ -47,25 +50,13 @@ protected:
 
 
 
-class Player : public QWidget
+class Player : public QMainWindow
 {
     Q_OBJECT
-  //  QSlider *_positionSlider;
-  //  QSlider *_volumeSlider;
 
-#ifdef Q_WS_X11    
-    QX11EmbedContainer *_videoWidget;
-#else
-    QFrame *_videoWidget;
-#endif   
     QTimer *poller;
-    bool _isPlaying;
 
-    libvlc_instance_t *_vlcinstance;
-    libvlc_media_player_t *_mp;
-    libvlc_media_t *_m;
 
-    //QDial *dial_;
 
     Thread thread_;
     CtrlComm ctrlCommThread_;
@@ -78,27 +69,26 @@ class Player : public QWidget
     QLabel *commInfo3_;
 
 
-
     Form_KM *km_;
     Form_KM *km2_;
 
     QTimer testTimer;
 
+    Ui::MainWindow *ui;
+    CamClient camClient;
 
 public:
-    Player();
+    Player(QWidget *parent = 0);
     ~Player();
 
 
 public slots:
     void playFile(QString file);
-    void updateInterface();
-    void changeVolume(int newVolume);
-    void changePosition(int newPosition);
     void setValueXXX(int value);
 
     void change_Speed();
 
+    void showNewImage(QImage img);
 
 };
 

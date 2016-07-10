@@ -14,32 +14,35 @@ INCLUDEPATH += .
 
 QT += widgets network serialport
 
-LIBS += -lvlc -lwiringPi
+LIBS +=  -lwiringPi
 
 # Input
-HEADERS += \
+HEADERS += camclient.h \
     Xcar.h \
     CtrlComm.h \
     Log.h \
     form_km.h \
-    SerialThread.h
- #   SerialThread.h
+    SerialThread.h \
 
 
 SOURCES += main.cpp \
+    camclient.cpp \
     Xcar.cpp \
     Ctrlcomm.cpp \
     form_km.cpp \
     Serialthread.cpp
-  #  Serialthread.cpp
 
 RESOURCES += \
     image.qrc
 
 FORMS += \
-    form_km.ui
+    form_km.ui \
+    mainwindow.ui
 
 DISTFILES +=
+
+
+
 
 
 

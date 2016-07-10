@@ -2,8 +2,9 @@
  * Copyright © 2016 wjj <icoolsea@hotmail.com>
  */
 
-
+#include "ui_mainwindow.h"
 #include "Xcar.h"
+#include "camclient.h"
 
 #include "CtrlComm.h"
 
@@ -21,19 +22,12 @@
 #include <QLabel>
 #include <QThread>
 
-Player::Player()
-: QWidget()
+Player::Player(QWidget *parent)
+    :QMainWindow(parent),
+    ui(new Ui::MainWindow)
 {
-    //preparation of the vlc command
-    const char * const vlc_args[] = {
-              "--verbose=2", //be much more verbose then normal for debugging purpose
-              "--plugin-path=C:\\vlc-0.9.9-win32\\plugins\\" };
+    ui->setupUi(this);
 
-#ifdef Q_WS_X11
-    _videoWidget=new QX11EmbedContainer(this);
-#else
-    _videoWidget=new QFrame(this);
-#endif   
 
     commInfo_ = new QLabel("ffff");
     commInfo2_ = new QLabel("           距离 10 (m)");
@@ -73,16 +67,9 @@ Player::Player()
 //        vl1->addWidget(tt6, 0, 0);
 
 
-
-    QVBoxLayout *vlv= new QVBoxLayout;
-
-    vlv->addWidget(_videoWidget, 0, 0);
-
-
    // newLayout->addWidget(km_, 0, 0);
    // newLayout->addWidget(_videoWidget, 0, 1);
    // newLayout->addWidget(km2_, 0, 2);
-
 
 
     QHBoxLayout *hl = new QHBoxLayout;
@@ -98,17 +85,16 @@ Player::Player()
   //  newLayout->addLayout(topl,0,1);
     newLayout->addLayout(vl1,0,0);
     newLayout->addLayout(vl2,0,2);
-    newLayout->addLayout(vlv,0,1);
 
     newLayout->addLayout(hl,1,1);
 
-    newLayout->setColumnStretch(0, 1);
-    newLayout->setColumnStretch(1,3);
-    newLayout->setColumnStretch(2,1);
+ //@   newLayout->setColumnStretch(0, 1);
+    //newLayout->setColumnStretch(1,3);
+    //newLayout->setColumnStretch(2,1);
 
 
-    newLayout->setRowStretch(0,6);
-    newLayout->setRowStretch(1,1);
+    //newLayout->setRowStretch(0,6);
+    //@newLayout->setRowStretch(1,1);
  //   newLayout->setRowStretch(2,1);
 
 
@@ -126,16 +112,14 @@ Player::Player()
     testTimer.start(10);
 
 
-    _isPlaying=false;
     poller=new QTimer(this);
 
     //create a new libvlc instance
-    _vlcinstance=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);  //tricky calculation of the char space used
-//    _vlcinstance=libvlc_new(0, NULL);  //tricky calculation of the char space used
+   // _vlcinstance=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);  //tricky calculation of the char space used
 
    // while (1) {};
     // Create a media player playing environement
-    _mp = libvlc_media_player_new (_vlcinstance);
+  //  _mp = libvlc_media_player_new (_vlcinstance);
 
     // Object obj;
     QObject::connect(&thread_, SIGNAL (aSignal(int)), this, SLOT (setValueXXX(int)));
@@ -147,6 +131,10 @@ Player::Player()
 
     connect(poller, SIGNAL(timeout()), this, SLOT(updateInterface()));
 
+    camClient.connectToHost(QHostAddress("115.196.223.113"), 8083);
+    camClient.requestImage();
+
+    connect(&camClient, SIGNAL(newImageReady(QImage)), this, SLOT(showNewImage(QImage)));
 
     poller->start(100); //start timer to trigger every 100 ms the updateInterface slot
 }
@@ -163,95 +151,13 @@ void Player::setValueXXX(int x)
 //desctructor
 Player::~Player()
 {
-    /* Stop playing */
-    libvlc_media_player_stop (_mp);
 
-    /* Free the media_player */
-    libvlc_media_player_release (_mp);
-
-    libvlc_release (_vlcinstance);
 }
 
 void Player::playFile(QString file)
 {
 
-
-    /* Create a new LibVLC media descriptor */
-    _m = libvlc_media_new_path(_vlcinstance, file.toStdString().c_str());
-
- //    _m = libvlc_media_new_location (_vlcinstance, "http://192.168.8.1:8083/?action=stream");
-
-    libvlc_media_player_set_media (_mp, _m);
-
-    // /!\ Please note /!\
-    //
-    // passing the widget to the lib shows vlc at which position it should show up
-    // vlc automatically resizes the video to the ´given size of the widget
-    // and it even resizes it, if the size changes at the playing
-    
-    /* Get our media instance to use our window */
-    #if defined(Q_OS_WIN)
-        libvlc_media_player_set_drawable(_mp, reinterpret_cast<unsigned int>(_videoWidget->winId()), &_vlcexcep );
-        //libvlc_media_player_set_hwnd(_mp, _videoWidget->winId(), &_vlcexcep ); // for vlc 1.0
-    #elif defined(Q_OS_MAC)
-        libvlc_media_player_set_drawable(_mp, _videoWidget->winId(), &_vlcexcep );
-        //libvlc_media_player_set_agl (_mp, _videoWidget->winId(), &_vlcexcep); // for vlc 1.0
-    #else //Linux
-        //[20101201 Ondrej Spilka] obsolete call on libVLC >=1.1.5 
-        //libvlc_media_player_set_drawable(_mp, _videoWidget->winId(), &_vlcexcep );
-        //libvlc_media_player_set_xwindow(_mp, _videoWidget->winId(), &_vlcexcep ); // for vlc 1.0
-
-     /* again note X11 handle on Linux is needed
-        winID() returns X11 handle when QX11EmbedContainer us used */
-     
-        int windid = _videoWidget->winId();
-        libvlc_media_player_set_xwindow (_mp, windid );
-
-
-
-    /* Play */
-    libvlc_media_player_play (_mp);
-#endif
-    _isPlaying=true;
 }
-
-void Player::changeVolume(int newVolume)
-{
-    libvlc_audio_set_volume (_mp,newVolume );
-}
-
-void Player::changePosition(int newPosition)
-{
-    // It's possible that the vlc doesn't play anything
-    // so check before
-    libvlc_media_t *curMedia = libvlc_media_player_get_media (_mp);
-    if (curMedia == NULL)
-        return;
-
-    float pos=(float)(newPosition)/(float)POSITION_RESOLUTION;
-    libvlc_media_player_set_position (_mp, pos);
-}
-
-void Player::updateInterface()
-{
-    if(!_isPlaying)
-        return;
-
-
-    // It's possible that the vlc doesn't play anything
-    // so check before
-    libvlc_media_t *curMedia = libvlc_media_player_get_media (_mp);
-    if (curMedia == NULL)
-        return;
-
-    float pos=libvlc_media_player_get_position (_mp);
-    int siderPos=(int)(pos*(float)(POSITION_RESOLUTION));
-    //_positionSlider->setValue(siderPos);
-    int volume=libvlc_audio_get_volume (_mp);
-    //_volumeSlider->setValue(volume);
-
-}
-
 
 static float temp = 0.0;
 void Player::change_Speed()
@@ -261,3 +167,7 @@ void Player::change_Speed()
 }
 
 
+void Player::showNewImage(QImage img)
+{
+    ui->imgLabel->setPixmap(QPixmap::fromImage(img));
+}
