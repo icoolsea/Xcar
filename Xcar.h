@@ -21,7 +21,6 @@
 
 class QVBoxLayout;
 class QPushButton;
-class QTimer;
 class QFrame;
 class QSlider;
 
@@ -30,65 +29,57 @@ class QSlider;
 
 class Thread : public QThread
 {
-Q_OBJECT
+        Q_OBJECT
 signals:
-    void aSignal(int value);
+        void aSignal(int value);
 protected:
-    void run() {
-      //  emit aSignal();
+        void run() {
+                //  emit aSignal();
 
-        while (true) {
-            sleep(1);
+                while (true) {
+                        sleep(1);
 
-            qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
-            int random = qrand() % 100;
-            emit aSignal(random);
+                        qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
+                        int random = qrand() % 100;
+                        emit aSignal(random);
+                }
         }
-    }
 };
-
-
 
 
 class Player : public QMainWindow
 {
-    Q_OBJECT
+        Q_OBJECT
 
-    QTimer *poller;
+        Thread thread_;
+        CtrlComm ctrlCommThread_;
 
+        Form_KM *carSpeed_;
+        Form_KM *servoAngle_;
 
+        QTimer testTimer;
 
-    Thread thread_;
-    CtrlComm ctrlCommThread_;
-
-
-    QLabel *commInfo_;
-
-    QLabel *commInfo2_;
-
-    QLabel *commInfo3_;
-
-
-    Form_KM *km_;
-    Form_KM *km2_;
-
-    QTimer testTimer;
-
-    Ui::MainWindow *ui;
-    CamClient camClient;
+        Ui::MainWindow *ui;
+        CamClient camClient;
 
 public:
-    Player(QWidget *parent = 0);
-    ~Player();
+        Player(QWidget *parent = 0);
+        ~Player();
 
 
 public slots:
-    void playFile(QString file);
-    void setValueXXX(int value);
+        void playFile(QString file);
 
-    void change_Speed();
+        void showSpeed(int value);
+        void showDistance(int x);
+        void showTemperature(int x);
 
-    void showNewImage(QImage img);
+        void showLeftPower(int x);
+        void showRightPower(int x);
+
+        void change_Speed();
+
+        void showNewImage(QImage img);
 
 };
 

@@ -9,6 +9,7 @@
 #include "CtrlComm.h"
 
 #include <sys/stat.h>
+#include "unistd.h"
 
 
 //#include <QX11EmbedContainer>
@@ -23,129 +24,100 @@
 #include <QThread>
 
 Player::Player(QWidget *parent)
-    :QMainWindow(parent),
-    ui(new Ui::MainWindow)
+        :QMainWindow(parent),
+         ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
+        ui->setupUi(this);
 
 
-    commInfo_ = new QLabel("ffff");
-    commInfo2_ = new QLabel("           距离 10 (m)");
-    commInfo3_ = new QLabel("           温度 32 (摄氏度)");
+    //    QLabel *carAngle = new QLabel("车体角度");
+        carSpeed_ = new Form_KM(this);
 
 
-    QLabel *tt1 =new QLabel("电压 10 (V)");
-    QLabel *tt2 =new QLabel("电压 10 (V)");
-    QLabel *tt3 = new QLabel("车体角度");
-    QLabel *tt4 = new QLabel("驼机角度");;
+     //   QGridLayout *leftLayout = new  QGridLayout;
+    //    leftLayout->addWidget(carSpeed_, 0, 0);
+     //   leftLayout->addWidget(carAngle, 1, 0);
 
 
-    km_ = new Form_KM(this);
-    km2_ = new Form_KM(this);
+        servoAngle_ = new Form_KM(this);
 
-    QGridLayout *topl= new  QGridLayout;
+      //  QLabel *servoAngle = new QLabel("驼机角度");;
 
-    QLabel *tt8 = new QLabel("");
-        topl->addWidget(tt8, 0, 0);
-
-
-    QGridLayout *vl1= new  QGridLayout;
-    vl1->addWidget(km_, 0, 0);
-    vl1->addWidget(tt3, 1, 0);
-    vl1->addWidget(tt1, 2, 0);
-
-//    QLabel *tt5 = new QLabel("");
-//        vl1->addWidget(tt5, 0, 0);
-
-
-    QGridLayout *vl2= new QGridLayout;
-    vl2->addWidget(km2_,0,0);
-    vl2->addWidget(tt4,1,0);
-    vl2->addWidget(tt2,2,0);
-
-//    QLabel *tt6 = new QLabel("");
-//        vl1->addWidget(tt6, 0, 0);
-
-
-   // newLayout->addWidget(km_, 0, 0);
-   // newLayout->addWidget(_videoWidget, 0, 1);
-   // newLayout->addWidget(km2_, 0, 2);
-
-
-    QHBoxLayout *hl = new QHBoxLayout;
-
-
-    hl->addWidget(commInfo_,0);
-    hl->addWidget(commInfo2_,1);
-    hl->addWidget(commInfo3_,2);
+   //     QGridLayout *rightLayout = new QGridLayout;
+     //   rightLayout->addWidget(servoAngle_,0,0);
+      //  rightLayout->addWidget(servoAngle,1,0);
 
         QGridLayout *newLayout = new QGridLayout;
+        newLayout->addWidget(carSpeed_, 0 , 0);
+        newLayout->addWidget(servoAngle_, 0 , 2);
+        newLayout->setSpacing(550);
+
+        newLayout->setContentsMargins(10, 100, 100, 100);
+
+      //  newLayout->addLayout(leftLayout,0,0);
+ //       newLayout->addLayout(rightLayout,0,3);
 
 
-  //  newLayout->addLayout(topl,0,1);
-    newLayout->addLayout(vl1,0,0);
-    newLayout->addLayout(vl2,0,2);
-
-    newLayout->addLayout(hl,1,1);
-
- //@   newLayout->setColumnStretch(0, 1);
-    //newLayout->setColumnStretch(1,3);
-    //newLayout->setColumnStretch(2,1);
+        ui->centralWidget->setLayout(newLayout);
+        QPalette palette;
+        palette.setBrush(QPalette::Background,QBrush(Qt::black));
+        ui->centralWidget->setPalette(palette);
+        ui->centralWidget->setAutoFillBackground(true);
 
 
-    //newLayout->setRowStretch(0,6);
-    //@newLayout->setRowStretch(1,1);
- //   newLayout->setRowStretch(2,1);
+        connect(&testTimer,SIGNAL(timeout()),this,SLOT(change_Speed()));
+        testTimer.start(10);
 
 
-    setLayout(newLayout);
+        QObject::connect(&thread_, SIGNAL (aSignal(int)), this, SLOT (showSpeed(int)));
+        thread_.start();
 
-   // QVBoxLayout *layout = new QVBoxLayout;
-   // layout->addWidget(_videoWidget);
-   // layout->addWidget(commInfo_,30,Qt::AlignLeft);
-  //  setLayout(layout);
-
-   // km_->setGeometry(110,120,400,255);
-    //km_->show();
-
-    connect(&testTimer,SIGNAL(timeout()),this,SLOT(change_Speed()));
-    testTimer.start(10);
+        QObject::connect(&ctrlCommThread_, SIGNAL (sSignal(char)), this, SLOT (showSpeed(char)));
+        ctrlCommThread_.start();
 
 
-    poller=new QTimer(this);
+        camClient.connectToHost(QHostAddress("115.196.223.113"), 8083);
+        camClient.requestImage();
 
-    //create a new libvlc instance
-   // _vlcinstance=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);  //tricky calculation of the char space used
+        connect(&camClient, SIGNAL(newImageReady(QImage)), this, SLOT(showNewImage(QImage)));
 
-   // while (1) {};
-    // Create a media player playing environement
-  //  _mp = libvlc_media_player_new (_vlcinstance);
-
-    // Object obj;
-    QObject::connect(&thread_, SIGNAL (aSignal(int)), this, SLOT (setValueXXX(int)));
-    thread_.start();
-
-    //Serial Thread
-     QObject::connect(&ctrlCommThread_, SIGNAL (sSignal(char)), this, SLOT (setValueXXX(char)));
-     ctrlCommThread_.start();
-
-    connect(poller, SIGNAL(timeout()), this, SLOT(updateInterface()));
-
-    camClient.connectToHost(QHostAddress("115.196.223.113"), 8083);
-    camClient.requestImage();
-
-    connect(&camClient, SIGNAL(newImageReady(QImage)), this, SLOT(showNewImage(QImage)));
-
-    poller->start(100); //start timer to trigger every 100 ms the updateInterface slot
 }
 
-void Player::setValueXXX(int x)
+void Player::showSpeed(int x)
+{
+        QString t = QString::number(x, 16).toUpper();
+        QString tmp = "速度(m/s):" + t;
+        ui->speedLabel->setText(tmp);
+}
+
+void Player::showDistance(int x)
 {
 
-    QString t = QString::number(x, 16).toUpper();
+        QString t = QString::number(x, 16).toUpper();
+        QString tmp = "距离(m):" + t;
+        ui->distanceLabel->setText(tmp);
+}
 
-    QString tmp = "速度"" " + t + "m/s";
-    commInfo_->setText(tmp);
+
+void Player::showTemperature(int x)
+{
+        QString t = QString::number(x, 16).toUpper();
+        QString tmp = "温度(摄氏度):" + t;
+        ui->temperatureLabel->setText(tmp);
+}
+
+void Player::showLeftPower(int x)
+{
+        QString t = QString::number(x, 16).toUpper();
+        QString tmp = "电压(V):" + t;
+        ui->leftPowerLabel->setText(tmp);
+}
+
+void Player::showRightPower(int x)
+{
+        QString t = QString::number(x, 16).toUpper();
+        QString tmp = "电压(V):" + t;
+        ui->rightPowerLabel->setText(tmp);
 }
 
 //desctructor
@@ -162,12 +134,12 @@ void Player::playFile(QString file)
 static float temp = 0.0;
 void Player::change_Speed()
 {
-    temp = temp + 0.5;
-    km_->change_Speed(temp);
+        temp = temp + 0.5;
+        carSpeed_->change_Speed(temp);
 }
 
 
 void Player::showNewImage(QImage img)
 {
-    ui->imgLabel->setPixmap(QPixmap::fromImage(img));
+        ui->imgLabel->setPixmap(QPixmap::fromImage(img));
 }
