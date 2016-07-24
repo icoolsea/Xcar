@@ -2,7 +2,7 @@
  * Copyright © 2016 wjj <icoolsea@hotmail.com>
  */
 
-#include "camclient.h"
+#include "Camclient.h"
 
 
 #ifndef XCAR_H
@@ -41,7 +41,7 @@ protected:
 
                         qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
                         int random = qrand() % 100;
-                        emit aSignal(random);
+                  //      emit aSignal(random);
                 }
         }
 };
@@ -70,12 +70,12 @@ public:
 public slots:
         void playFile(QString file);
 
-        void showSpeed(int value);
-        void showDistance(int x);
-        void showTemperature(int x);
+        void showSpeed(float value);
+        void showDistance(float x);
+        void showTemperature(float x);
 
-        void showLeftPower(int x);
-        void showRightPower(int x);
+        void showLeftPower(float x);
+        void showRightPower(float x);
 
         void change_Speed();
 

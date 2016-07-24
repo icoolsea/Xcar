@@ -4,7 +4,7 @@
 
 #include "ui_mainwindow.h"
 #include "Xcar.h"
-#include "camclient.h"
+#include "Camclient.h"
 
 #include "CtrlComm.h"
 
@@ -69,54 +69,53 @@ Player::Player(QWidget *parent)
         testTimer.start(10);
 
 
-        QObject::connect(&thread_, SIGNAL (aSignal(int)), this, SLOT (showSpeed(int)));
-        thread_.start();
+        //QObject::connect(&thread_, SIGNAL (aSignal(int)), this, SLOT (showSpeed(int)));
+        //thread_.start();
 
-        QObject::connect(&ctrlCommThread_, SIGNAL (sSignal(char)), this, SLOT (showSpeed(char)));
+        QObject::connect(&ctrlCommThread_, SIGNAL (showSpeedSignal(float)), this, SLOT (showSpeed(float)));
+        QObject::connect(&ctrlCommThread_, SIGNAL (showDistanceSignal(float)), this, SLOT (showDistance(float)));
+        QObject::connect(&ctrlCommThread_, SIGNAL (showTemperatureSignal(float)), this, SLOT (showTemperature(float)));
+        QObject::connect(&ctrlCommThread_, SIGNAL (showLeftPowerSignal(float)), this, SLOT (showLeftPower(float)));
+        QObject::connect(&ctrlCommThread_, SIGNAL (showRightPowerSignal(float)), this, SLOT (showRightPower(float)));
+
         ctrlCommThread_.start();
 
 
-        camClient.connectToHost(QHostAddress("115.196.223.113"), 8083);
+        camClient.connectToHost(QHostAddress("192.168.8.1"), 8083);
         camClient.requestImage();
 
         connect(&camClient, SIGNAL(newImageReady(QImage)), this, SLOT(showNewImage(QImage)));
 
 }
 
-void Player::showSpeed(int x)
+void Player::showSpeed(float x)
 {
-        QString t = QString::number(x, 16).toUpper();
-        QString tmp = "速度(m/s):" + t;
+        QString tmp = QString("速度(m/s): %1").arg(x);
         ui->speedLabel->setText(tmp);
 }
 
-void Player::showDistance(int x)
+void Player::showDistance(float x)
 {
-
-        QString t = QString::number(x, 16).toUpper();
-        QString tmp = "距离(m):" + t;
+        QString tmp = QString("距离(m): %1").arg(x);
         ui->distanceLabel->setText(tmp);
 }
 
 
-void Player::showTemperature(int x)
+void Player::showTemperature(float x)
 {
-        QString t = QString::number(x, 16).toUpper();
-        QString tmp = "温度(摄氏度):" + t;
+        QString tmp = QString("温度(摄氏度): %1").arg(x);
         ui->temperatureLabel->setText(tmp);
 }
 
-void Player::showLeftPower(int x)
+void Player::showLeftPower(float x)
 {
-        QString t = QString::number(x, 16).toUpper();
-        QString tmp = "电压(V):" + t;
+        QString tmp = QString("电量: %1").arg(x);
         ui->leftPowerLabel->setText(tmp);
 }
 
-void Player::showRightPower(int x)
+void Player::showRightPower(float x)
 {
-        QString t = QString::number(x, 16).toUpper();
-        QString tmp = "电压(V):" + t;
+        QString tmp = QString("电量: %1").arg(x);
         ui->rightPowerLabel->setText(tmp);
 }
 

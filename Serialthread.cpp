@@ -119,8 +119,9 @@ int SerialThread::readData(char *buffer, int count, int timeout)
                 }
                 else
                 {
- //qDebug("5 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+ //qDebug("5 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx %x, \n", buffer[len]);
                         len += n;
+ //qDebug("read data: n = %d, len = %d\n", n, len);
                         if (count == len)
                                 break;
                 }

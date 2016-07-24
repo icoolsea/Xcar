@@ -61,34 +61,52 @@ void CtrlComm::run() {
                 }
                 unsigned char tmp[5];
                 memset(&tmp, 0x00, 5);
-                int count = serial_->readData((char *)tmp, 5);
+                int count = serial_->readData((char *)tmp, 5, 10000);
                 if (count <= 0)
                 {
                         continue;
+
+                    LOG_ERROR<<"1 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
                 }
 
 
-                //  int count = serialArray_.append(tmp);
-                memcpy(serialArray_.data(), tmp, count);
+                QByteArray okData((const char*)tmp);
+
+                serialArray_.append(okData);
+                LOG_DEBUG<<"[Serial], recv data: "<<serialArray_.toHex();
+
 
                 //0xFF 0xFF
-                char spos[3] = {(unsigned char)0xff};
-                char epos[3] = {(unsigned char)0xff};
+                char spos[2] = {(unsigned char)0xff};
+                char epos[2] = {(unsigned char)0xff};
 
                 int startPos = serialArray_.indexOf(spos, 0);
                 if (startPos == -1)
                 {
-                        serialArray_.clear();
-                        continue;
+                    LOG_ERROR<<"1 not find data\n ";
+                    serialArray_.clear();
+                    continue;
                 }
 
-                int endPos = serialArray_.indexOf(epos, startPos);
+                int endPos = serialArray_.indexOf(epos, startPos+1);
                 if (endPos == -1)
                 {
-                        continue;
+                    LOG_ERROR<<"2 not find data\n ";
+                    continue;
                 }
 
-                QByteArray serialBuf = serialArray_.mid(startPos, endPos-startPos+2);
+               if (endPos - startPos == 1)
+                {
+                    serialArray_.clear();
+                    LOG_ERROR<<"3 not find data\n ";
+                    continue;
+                }
+
+                QByteArray serialBuf = serialArray_.mid(startPos, endPos-startPos+1);
+
+
+                QByteArray t = serialBuf.toHex();
+                LOG_ERROR<<t;
 
                 serialArray_.clear();
 
@@ -172,10 +190,80 @@ void CtrlComm::readyReadSlot()
         //            return;
         //        }
 
-        QByteArray message = carSocket_->read(1024);
+        QByteArray message = carSocket_->read(5);
         // carSocket_->waitForReadyRead(timeOut);
 
         LOG_DEBUG<<"read msg from server"<<message<<endl;
+
+
+        socketArray_.append(message);
+        LOG_DEBUG<<"recv data: "<<socketArray_.toHex();
+
+        //0xFF 0xFF
+        char spos[2] = {(unsigned char)0xff};
+        char epos[2] = {(unsigned char)0xff};
+
+        int startPos = socketArray_.indexOf(spos, 0);
+        if (startPos == -1)
+        {
+                LOG_ERROR<<"1 not find data\n ";
+                socketArray_.clear();
+                return;
+        }
+
+        int endPos = socketArray_.indexOf(epos, startPos+1);
+        if (endPos == -1)
+        {
+                LOG_ERROR<<"2 not find data\n ";
+                return;
+        }
+
+        if (endPos - startPos == 1)
+        {
+                socketArray_.clear();
+                LOG_ERROR<<"3 not find data\n ";
+                return;
+        }
+
+        QByteArray serialBuf = socketArray_.mid(startPos, endPos-startPos+1);
+
+        QByteArray t = serialBuf.toHex();
+        LOG_ERROR<<t;
+
+
+        short a = socketArray_[2];
+        short b = socketArray_[3];
+
+        float value = (a<<8|b)/10.0;
+
+        char speed1[3] = {(unsigned char)0xff, (unsigned char)0x05};
+        char speed2[3] = {(unsigned char)0xff, (unsigned char)0x06};
+
+        char power[3] = {(unsigned char)0xff, (unsigned char)0x08};
+
+        char tmperature1[3] = {(unsigned char)0xff, (unsigned char)0x0a};
+        char tmperature2[3] = {(unsigned char)0xff, (unsigned char)0x0b};
+
+        char angle1[3] = {(unsigned char)0xff, (unsigned char)0x0c};
+        char angle2[3] = {(unsigned char)0xff, (unsigned char)0x0d};
+
+
+        if (socketArray_.indexOf(speed1, 0) == 0 || socketArray_.indexOf(speed2, 0) == 0)
+                emit showSpeedSignal(value);
+        else if (socketArray_.indexOf(power, 0) == 0)
+                emit showRightPowerSignal(value);
+        else if (socketArray_.indexOf(tmperature1, 0) == 0 || socketArray_.indexOf(tmperature2, 0) == 0)
+                emit showTemperatureSignal(value);
+        else if (socketArray_.indexOf(angle1, 0) == 0 || socketArray_.indexOf(angle2, 0) == 0)
+            ;//    emit showTemperatureSignal(value);
+
+    //void showDistanceSignal(float x);
+    //void showLeftPowerSignal(float x);
+
+
+
+
+        socketArray_.clear();
 }
 
 void CtrlComm::errorSlot(QAbstractSocket::SocketError)

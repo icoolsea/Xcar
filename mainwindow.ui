@@ -29,8 +29,50 @@
       <height>271</height>
      </rect>
     </property>
+    <property name="palette">
+     <palette>
+      <active>
+       <colorrole role="WindowText">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>244</red>
+          <green>28</green>
+          <blue>28</blue>
+         </color>
+        </brush>
+       </colorrole>
+      </active>
+      <inactive>
+       <colorrole role="WindowText">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>244</red>
+          <green>28</green>
+          <blue>28</blue>
+         </color>
+        </brush>
+       </colorrole>
+      </inactive>
+      <disabled>
+       <colorrole role="WindowText">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>159</red>
+          <green>158</green>
+          <blue>158</blue>
+         </color>
+        </brush>
+       </colorrole>
+      </disabled>
+     </palette>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
     <property name="text">
-     <string>ttt</string>
+     <string>无视频数据</string>
     </property>
    </widget>
    <widget class="QLabel" name="speedLabel">
@@ -88,13 +130,13 @@
      </font>
     </property>
     <property name="text">
-     <string>ttt</string>
+     <string>速度(m/s):</string>
     </property>
    </widget>
    <widget class="QLabel" name="distanceLabel">
     <property name="geometry">
      <rect>
-      <x>420</x>
+      <x>440</x>
       <y>350</y>
       <width>120</width>
       <height>20</height>
@@ -143,7 +185,7 @@
      </font>
     </property>
     <property name="text">
-     <string>ttt</string>
+     <string>距离:</string>
     </property>
    </widget>
    <widget class="QLabel" name="temperatureLabel">
@@ -151,7 +193,7 @@
      <rect>
       <x>270</x>
       <y>350</y>
-      <width>120</width>
+      <width>151</width>
       <height>20</height>
      </rect>
     </property>
@@ -198,7 +240,7 @@
      </font>
     </property>
     <property name="text">
-     <string>ttt</string>
+     <string>温度(摄氏度):</string>
     </property>
    </widget>
    <widget class="QLabel" name="leftPowerLabel">
@@ -248,7 +290,7 @@
      </palette>
     </property>
     <property name="text">
-     <string>ttt</string>
+     <string>电量:</string>
     </property>
    </widget>
    <widget class="QLabel" name="rightPowerLabel">
@@ -306,7 +348,7 @@
      </font>
     </property>
     <property name="text">
-     <string>ttt</string>
+     <string>电量:</string>
     </property>
    </widget>
   </widget>

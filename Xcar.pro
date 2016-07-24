@@ -16,20 +16,21 @@ QT += widgets network serialport
 
 
 # Input
-HEADERS += camclient.h \
+HEADERS += \
     Xcar.h \
     CtrlComm.h \
     Log.h \
     form_km.h \
     SerialThread.h \
+    Camclient.h
 
 
 SOURCES += main.cpp \
-    camclient.cpp \
     Xcar.cpp \
     Ctrlcomm.cpp \
     form_km.cpp \
-    Serialthread.cpp
+    Serialthread.cpp \
+    Camclient.cpp
 
 RESOURCES += \
     image.qrc

@@ -15,6 +15,14 @@ signals:
     void sSignal(char value);
     void sendToServerSignal(QByteArray);
 
+    void showSpeedSignal(float value);
+    void showDistanceSignal(float x);
+    void showTemperatureSignal(float x);
+
+    void showLeftPowerSignal(float x);
+    void showRightPowerSignal(float x);
+
+
 protected:
     void run();
 
@@ -42,11 +50,13 @@ private:
     int connectToServer(const char * ip, int port);
 
 
+
     QTcpSocket *carSocket_;
     bool isConnected_;
 
     SerialThread *serial_;
     QByteArray serialArray_;
+    QByteArray socketArray_;
 
 };
 

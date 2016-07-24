@@ -1,4 +1,4 @@
-#include "camclient.h"
+#include "Camclient.h"
 #include <QFile>
 
 CamClient::CamClient(QObject *parent) : QObject(parent)
