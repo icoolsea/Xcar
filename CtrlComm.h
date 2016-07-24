@@ -16,7 +16,7 @@ signals:
     void sendToServerSignal(QByteArray);
 
     void showSpeedSignal(float value);
-    void showDistanceSignal(float x);
+    void showAngleSignal(float x);
     void showTemperatureSignal(float x);
 
     void showLeftPowerSignal(float x);

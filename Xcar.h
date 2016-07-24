@@ -71,7 +71,7 @@ public slots:
         void playFile(QString file);
 
         void showSpeed(float value);
-        void showDistance(float x);
+        void showAngleSignal(float x);
         void showTemperature(float x);
 
         void showLeftPower(float x);

@@ -49,10 +49,10 @@ Player::Player(QWidget *parent)
 
         QGridLayout *newLayout = new QGridLayout;
         newLayout->addWidget(carSpeed_, 0 , 0);
-        newLayout->addWidget(servoAngle_, 0 , 2);
-        newLayout->setSpacing(550);
+        newLayout->addWidget(servoAngle_, 0 , 1);
+        newLayout->setSpacing(400);
 
-        newLayout->setContentsMargins(10, 100, 100, 100);
+        newLayout->setContentsMargins(10, 10, 0, 0);
 
       //  newLayout->addLayout(leftLayout,0,0);
  //       newLayout->addLayout(rightLayout,0,3);
@@ -73,7 +73,7 @@ Player::Player(QWidget *parent)
         //thread_.start();
 
         QObject::connect(&ctrlCommThread_, SIGNAL (showSpeedSignal(float)), this, SLOT (showSpeed(float)));
-        QObject::connect(&ctrlCommThread_, SIGNAL (showDistanceSignal(float)), this, SLOT (showDistance(float)));
+        QObject::connect(&ctrlCommThread_, SIGNAL (showAngleSignal(float)), this, SLOT (showAngleSignal(float)));
         QObject::connect(&ctrlCommThread_, SIGNAL (showTemperatureSignal(float)), this, SLOT (showTemperature(float)));
         QObject::connect(&ctrlCommThread_, SIGNAL (showLeftPowerSignal(float)), this, SLOT (showLeftPower(float)));
         QObject::connect(&ctrlCommThread_, SIGNAL (showRightPowerSignal(float)), this, SLOT (showRightPower(float)));
@@ -94,16 +94,16 @@ void Player::showSpeed(float x)
         ui->speedLabel->setText(tmp);
 }
 
-void Player::showDistance(float x)
+void Player::showAngleSignal(float x)
 {
-        QString tmp = QString("距离(m): %1").arg(x);
+        QString tmp = QString("角度(°): %1").arg(x);
         ui->distanceLabel->setText(tmp);
 }
 
 
 void Player::showTemperature(float x)
 {
-        QString tmp = QString("温度(摄氏度): %1").arg(x);
+        QString tmp = QString("温度(℃): %1").arg(x);
         ui->temperatureLabel->setText(tmp);
 }
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
-    <height>480</height>
+    <width>865</width>
+    <height>539</height>
    </rect>
   </property>
   <property name="contextMenuPolicy">
@@ -23,10 +23,10 @@
    <widget class="QLabel" name="imgLabel">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>50</y>
-      <width>381</width>
-      <height>271</height>
+      <x>0</x>
+      <y>0</y>
+      <width>841</width>
+      <height>521</height>
      </rect>
     </property>
     <property name="palette">
@@ -72,14 +72,14 @@
      </font>
     </property>
     <property name="text">
-     <string>无视频数据</string>
+     <string>                                                                              无视频数据</string>
     </property>
    </widget>
    <widget class="QLabel" name="speedLabel">
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>350</y>
+      <y>460</y>
       <width>120</width>
       <height>20</height>
      </rect>
@@ -136,8 +136,8 @@
    <widget class="QLabel" name="distanceLabel">
     <property name="geometry">
      <rect>
-      <x>440</x>
-      <y>350</y>
+      <x>430</x>
+      <y>110</y>
       <width>120</width>
       <height>20</height>
      </rect>
@@ -185,14 +185,14 @@
      </font>
     </property>
     <property name="text">
-     <string>距离:</string>
+     <string>角度(°):</string>
     </property>
    </widget>
    <widget class="QLabel" name="temperatureLabel">
     <property name="geometry">
      <rect>
       <x>270</x>
-      <y>350</y>
+      <y>460</y>
       <width>151</width>
       <height>20</height>
      </rect>
@@ -240,16 +240,16 @@
      </font>
     </property>
     <property name="text">
-     <string>温度(摄氏度):</string>
+     <string>温度(℃):</string>
     </property>
    </widget>
    <widget class="QLabel" name="leftPowerLabel">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>260</y>
+      <y>450</y>
       <width>91</width>
-      <height>20</height>
+      <height>40</height>
      </rect>
     </property>
     <property name="palette">
@@ -289,6 +289,11 @@
       </disabled>
      </palette>
     </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
     <property name="text">
      <string>电量:</string>
     </property>
@@ -297,7 +302,7 @@
     <property name="geometry">
      <rect>
       <x>550</x>
-      <y>270</y>
+      <y>460</y>
       <width>91</width>
       <height>20</height>
      </rect>
@@ -352,25 +357,6 @@
     </property>
    </widget>
   </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>640</width>
-     <height>25</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QToolBar" name="mainToolBar">
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-  </widget>
-  <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

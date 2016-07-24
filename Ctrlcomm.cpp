@@ -61,7 +61,7 @@ void CtrlComm::run() {
                 }
                 unsigned char tmp[5];
                 memset(&tmp, 0x00, 5);
-                int count = serial_->readData((char *)tmp, 5, 10000);
+                int count = serial_->readData((char *)tmp, 5, timeOut);
                 if (count <= 0)
                 {
                         continue;
@@ -73,7 +73,7 @@ void CtrlComm::run() {
                 QByteArray okData((const char*)tmp);
 
                 serialArray_.append(okData);
-                LOG_DEBUG<<"[Serial], recv data: "<<serialArray_.toHex();
+         //       LOG_DEBUG<<"[Serial], recv data: "<<serialArray_.toHex();
 
 
                 //0xFF 0xFF
@@ -152,7 +152,7 @@ int CtrlComm::connectToServer(const char * ip, int port)
 
         carSocket_->abort();
         carSocket_->connectToHost(ip, port);
-        carSocket_->waitForConnected(timeOut);
+        carSocket_->waitForConnected(timeOut*100);
 
         LOG_DEBUG<<"connecting to server..."<<endl;
 
@@ -190,14 +190,16 @@ void CtrlComm::readyReadSlot()
         //            return;
         //        }
 
-        QByteArray message = carSocket_->read(5);
+   //0724/21:32     QByteArray message = carSocket_->read(5);
         // carSocket_->waitForReadyRead(timeOut);
 
-        LOG_DEBUG<<"read msg from server"<<message<<endl;
+        //LOG_DEBUG<<"read msg from server"<<message<<endl;
 
 
-        socketArray_.append(message);
-        LOG_DEBUG<<"recv data: "<<socketArray_.toHex();
+ //0724/21:32
+       // socketArray_.append(message);
+        socketArray_.append(carSocket_->readAll());
+       // LOG_DEBUG<<"recv data: "<<socketArray_.toHex();
 
         //0xFF 0xFF
         char spos[2] = {(unsigned char)0xff};
@@ -220,19 +222,21 @@ void CtrlComm::readyReadSlot()
 
         if (endPos - startPos == 1)
         {
-                socketArray_.clear();
-                LOG_ERROR<<"3 not find data\n ";
+                //socketArray_.clear();
+                socketArray_.remove(0, startPos+1);
+                LOG_ERROR<<"find data 0XFFFF, return\n ";
                 return;
         }
 
         QByteArray serialBuf = socketArray_.mid(startPos, endPos-startPos+1);
 
-        QByteArray t = serialBuf.toHex();
-        LOG_ERROR<<t;
+      //  QByteArray t = serialBuf.toHex();
+       // LOG_ERROR<<t<<"len = "<<socketArray_.size();
+        LOG_ERROR<<"len = "<<socketArray_.size();
 
 
-        short a = socketArray_[2];
-        short b = socketArray_[3];
+        short a = serialBuf[2];
+        short b = serialBuf[3];
 
         float value = (a<<8|b)/10.0;
 
@@ -248,22 +252,28 @@ void CtrlComm::readyReadSlot()
         char angle2[3] = {(unsigned char)0xff, (unsigned char)0x0d};
 
 
-        if (socketArray_.indexOf(speed1, 0) == 0 || socketArray_.indexOf(speed2, 0) == 0)
+        if (serialBuf.indexOf(speed1, 0) == 0 || serialBuf.indexOf(speed2, 0) == 0)
                 emit showSpeedSignal(value);
-        else if (socketArray_.indexOf(power, 0) == 0)
+        else if (serialBuf.indexOf(power, 0) == 0)
                 emit showRightPowerSignal(value);
-        else if (socketArray_.indexOf(tmperature1, 0) == 0 || socketArray_.indexOf(tmperature2, 0) == 0)
+        else if (serialBuf.indexOf(tmperature1, 0) == 0 || serialBuf.indexOf(tmperature2, 0) == 0)
                 emit showTemperatureSignal(value);
-        else if (socketArray_.indexOf(angle1, 0) == 0 || socketArray_.indexOf(angle2, 0) == 0)
-            ;//    emit showTemperatureSignal(value);
+        else if (serialBuf.indexOf(angle1, 0) == 0 ) {
+
+          //  qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
+          //  int random = qrand() % 1;
+         //   if (random == 0)
+                emit showAngleSignal(value);
+        }
+        else if (serialBuf.indexOf(angle2, 0) == 0)
+                emit showAngleSignal(0-value);
 
     //void showDistanceSignal(float x);
     //void showLeftPowerSignal(float x);
 
 
-
-
         socketArray_.clear();
+        //socketArray_.remove(0, startPos + 5);
 }
 
 void CtrlComm::errorSlot(QAbstractSocket::SocketError)
