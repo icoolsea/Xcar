@@ -11,6 +11,7 @@
 #include <vlc/vlc.h>
 
 #include "CtrlComm.h"
+#include "RecordScreen.h"
 #include "form_km.h"
 #include "ui_mainwindow.h"
 
@@ -53,6 +54,7 @@ class Player : public QMainWindow
 
         Thread thread_;
         CtrlComm ctrlCommThread_;
+        RecordScreen recordScreenThread_;
 
         Form_KM *carSpeed_;
         Form_KM *servoAngle_;
@@ -73,6 +75,8 @@ public:
 protected:
         void keyPressEvent(QKeyEvent *);
         void grabScreen();
+        void startRecordScreen();
+        void stopRecordScreen();
 
 
 public slots:
@@ -90,6 +94,8 @@ public slots:
         void showNewImage(QImage img);
 
         void changeCam(int mode);
+signals:
+        void stopRecordSignal();
 };
 
 #endif

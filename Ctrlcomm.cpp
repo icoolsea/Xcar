@@ -5,7 +5,7 @@
 #include <QSettings>
 #include <QByteArray>
 
-static const int timeOut = 100;
+static const int timeOut = 50;
 
 
 CtrlComm::CtrlComm() : isConnected_(false)
@@ -28,6 +28,8 @@ void CtrlComm::run() {
 
         carSocket_ = new QTcpSocket();
 
+ //       carSocket_->setSocketOption(QAbstractSocket::SendBufferSizeSocketOption, 0);
+
         connect(carSocket_, SIGNAL(connected()), this, SLOT(connectedSlot()), Qt::DirectConnection);
         connect(carSocket_, SIGNAL(disconnected()), this, SLOT(disconnectedSlot()), Qt::DirectConnection);
         connect(carSocket_, SIGNAL(readyRead()), this, SLOT(readyReadSlot()), Qt::DirectConnection);
@@ -47,6 +49,7 @@ void CtrlComm::run() {
         qDebug() << portResult;
         delete configIniRead;
 
+        char tmpdata[5] = {(unsigned char)0xff, (unsigned char)0x02, (unsigned char)0x02, (unsigned char)0x80, (unsigned char)0xff};
 
         connectToServer(ipResult.toStdString().c_str(), portResult.toShort());
 
@@ -64,11 +67,17 @@ void CtrlComm::run() {
                 int count = serial_->readData((char *)tmp, 5, timeOut);
                 if (count <= 0)
                 {
+              //      emit sendToServerSignal(tmpdata);
                         continue;
 
-                    LOG_ERROR<<"1 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
                 }
 
+ //                   LOG_ERROR<<"1 ===================================== not find data\n ";
+   //     carSocket_->write((const char*)tmp, count);
+     //               LOG_ERROR<<"2 ===================================== not find data\n ";
+       // carSocket_->waitForBytesWritten(timeOut);
+         //           LOG_ERROR<<"3 ===================================== not find data\n ";
+           //             continue;
 
                 QByteArray okData((const char*)tmp);
 
@@ -105,10 +114,20 @@ void CtrlComm::run() {
                 QByteArray serialBuf = serialArray_.mid(startPos, endPos-startPos+1);
 
 
+                if (serialBuf[1] == 0x02 && (serialBuf[3] != 0x80 || serialBuf[3] != 0x7f))
+                {
                 QByteArray t = serialBuf.toHex();
-                LOG_ERROR<<t;
-
+                  //  LOG_ERROR<<t;
+}
                 serialArray_.clear();
+
+
+                char light_front[5] = {(unsigned char)0xff, (unsigned char)0x03, (unsigned char)0x03, (unsigned char)0x01};
+                char light_back[5] = {(unsigned char)0xff, (unsigned char)0x03, (unsigned char)0x03, (unsigned char)0x02};
+                if (serialBuf.indexOf(light_front, 0) == 0)
+                    emit sendLightMode(1);
+                else if (serialBuf.indexOf(light_back, 0) == 0)
+                    emit sendLightMode(2);
 
 #endif
                 //  sleep(0.1);
@@ -233,6 +252,8 @@ void CtrlComm::readyReadSlot()
       //  QByteArray t = serialBuf.toHex();
        // LOG_ERROR<<t<<"len = "<<socketArray_.size();
         LOG_ERROR<<"len = "<<socketArray_.size();
+        socketArray_.clear();
+        //socketArray_.remove(0, startPos + 5);
 
 
         short a = serialBuf[2];
@@ -244,7 +265,6 @@ void CtrlComm::readyReadSlot()
         char speed2[3] = {(unsigned char)0xff, (unsigned char)0x06};
 
         char power[3] = {(unsigned char)0xff, (unsigned char)0x08};
-        char power_xxx[3] = {(unsigned char)0xff, (unsigned char)0x07};
 
         char tmperature1[3] = {(unsigned char)0xff, (unsigned char)0x0a};
         char tmperature2[3] = {(unsigned char)0xff, (unsigned char)0x0b};
@@ -253,36 +273,26 @@ void CtrlComm::readyReadSlot()
         char angle2[3] = {(unsigned char)0xff, (unsigned char)0x0d};
 
 
-        char light[3] = {(unsigned char)0xff, (unsigned char)0x03};
 
 
         if (serialBuf.indexOf(speed1, 0) == 0 || serialBuf.indexOf(speed2, 0) == 0)
                 emit showSpeedSignal(value);
-        else if (serialBuf.indexOf(power, 0) == 0)
+        else if (serialBuf.indexOf(power, 0) == 0) {
                 emit showRightPowerSignal(value);
+                serial_->writeData(serialBuf.data(), 5);//write back to serial port
+        }
         else if (serialBuf.indexOf(tmperature1, 0) == 0 || serialBuf.indexOf(tmperature2, 0) == 0)
                 emit showTemperatureSignal(value);
         else if (serialBuf.indexOf(angle1, 0) == 0 ) {
-
-          //  qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
-          //  int random = qrand() % 1;
-         //   if (random == 0)
                 emit showAngleSignal(value);
         }
         else if (serialBuf.indexOf(angle2, 0) == 0)
                 emit showAngleSignal(0-value);
-        else if (serialBuf.indexOf(light, 0) == 0)
-                emit sendLightMode(serialBuf[4]);
-        else if (serialBuf.indexOf(power_xxx, 0) == 0) {
-                serial_->writeData(serialBuf.data(), 5);//write back to serial port
-        }
 
     //void showDistanceSignal(float x);
     //void showLeftPowerSignal(float x);
 
 
-        socketArray_.clear();
-        //socketArray_.remove(0, startPos + 5);
 }
 
 void CtrlComm::errorSlot(QAbstractSocket::SocketError)

@@ -22,7 +22,8 @@ HEADERS += \
     Log.h \
     form_km.h \
     SerialThread.h \
-    Camclient.h
+    Camclient.h \
+    RecordScreen.h
 
 
 SOURCES += main.cpp \
@@ -30,7 +31,8 @@ SOURCES += main.cpp \
     Ctrlcomm.cpp \
     form_km.cpp \
     Serialthread.cpp \
-    Camclient.cpp
+    Camclient.cpp \
+    RecordScreen.cpp
 
 RESOURCES += \
     image.qrc

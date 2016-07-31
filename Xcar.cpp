@@ -7,6 +7,7 @@
 #include "Camclient.h"
 
 #include "CtrlComm.h"
+#include "RecordScreen.h"
 
 #include <sys/stat.h>
 #include "unistd.h"
@@ -22,6 +23,8 @@
 #include <QDial>
 #include <QLabel>
 #include <QThread>
+
+
 
 Player::Player(QWidget *parent)
         :QMainWindow(parent),
@@ -83,6 +86,8 @@ Player::Player(QWidget *parent)
 
         ctrlCommThread_.start();
 
+        QObject::connect(this, SIGNAL (stopRecordSignal()), &recordScreenThread_, SLOT (stopRecord()));
+
 
         camClient_Front.connectToHost(QHostAddress("192.168.1.1"), 8080);
         camClient_Back.connectToHost(QHostAddress("192.168.1.1"), 8081);
@@ -141,6 +146,9 @@ void Player::changeCam(int mode)
                 camClient_Front.disableShow();
                 camClient_Back.enableShow();
         }
+
+                qDebug()<<"chanecam mode"<<"back ==================\n"<<mode;
+
 }
 
 
@@ -170,10 +178,17 @@ void Player::showNewImage(QImage img)
 
 void Player::keyPressEvent(QKeyEvent *e)
 {
-        if (e->modifiers() == (Qt::ShiftModifier | Qt::ControlModifier) && e->key() == Qt::Key_S)
+        if (e->modifiers() == (Qt::AltModifier | Qt::ControlModifier) && e->key() == Qt::Key_S)
         {
                 grabScreen();
-                //pressed
+        }
+        else if (e->modifiers() == (Qt::AltModifier | Qt::ControlModifier) && e->key() == Qt::Key_Space)
+        {
+                startRecordScreen();
+        }
+        else if (e->modifiers() == (Qt::AltModifier | Qt::ControlModifier) && e->key() == Qt::Key_Enter)
+        {
+                stopRecordScreen();
         }
 }
 
@@ -200,7 +215,7 @@ void Player::grabScreen()
         }
         else
         {
-                if(!pix.save(filename, "jpg")) //保存图像
+                if(!pix.save(filename + ".jpg", "jpg")) //保存图像
                 {
                         QMessageBox::information(this,
                                                  tr("Failed to save the image"),
@@ -210,7 +225,12 @@ void Player::grabScreen()
         }
 }
 
-void Player::recordScreen()
+void Player::startRecordScreen()
 {
+    recordScreenThread_.start();
+}
 
+void Player::stopRecordScreen()
+{
+    emit stopRecordSignal();
 }
