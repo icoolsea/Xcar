@@ -25,27 +25,28 @@
 
 Player::Player(QWidget *parent)
         :QMainWindow(parent),
-         ui(new Ui::MainWindow)
+          ui(new Ui::MainWindow)
 {
         ui->setupUi(this);
+        camMode = 1;
 
 
-    //    QLabel *carAngle = new QLabel("车体角度");
+        //    QLabel *carAngle = new QLabel("车体角度");
         carSpeed_ = new Form_KM(this);
 
 
-     //   QGridLayout *leftLayout = new  QGridLayout;
-    //    leftLayout->addWidget(carSpeed_, 0, 0);
-     //   leftLayout->addWidget(carAngle, 1, 0);
+        //   QGridLayout *leftLayout = new  QGridLayout;
+        //    leftLayout->addWidget(carSpeed_, 0, 0);
+        //   leftLayout->addWidget(carAngle, 1, 0);
 
 
         servoAngle_ = new Form_KM(this);
 
-      //  QLabel *servoAngle = new QLabel("驼机角度");;
+        //  QLabel *servoAngle = new QLabel("驼机角度");;
 
-   //     QGridLayout *rightLayout = new QGridLayout;
-     //   rightLayout->addWidget(servoAngle_,0,0);
-      //  rightLayout->addWidget(servoAngle,1,0);
+        //     QGridLayout *rightLayout = new QGridLayout;
+        //   rightLayout->addWidget(servoAngle_,0,0);
+        //  rightLayout->addWidget(servoAngle,1,0);
 
         QGridLayout *newLayout = new QGridLayout;
         newLayout->addWidget(carSpeed_, 0 , 0);
@@ -54,8 +55,8 @@ Player::Player(QWidget *parent)
 
         newLayout->setContentsMargins(10, 10, 0, 0);
 
-      //  newLayout->addLayout(leftLayout,0,0);
- //       newLayout->addLayout(rightLayout,0,3);
+        //  newLayout->addLayout(leftLayout,0,0);
+        //       newLayout->addLayout(rightLayout,0,3);
 
 
         ui->centralWidget->setLayout(newLayout);
@@ -78,13 +79,22 @@ Player::Player(QWidget *parent)
         QObject::connect(&ctrlCommThread_, SIGNAL (showLeftPowerSignal(float)), this, SLOT (showLeftPower(float)));
         QObject::connect(&ctrlCommThread_, SIGNAL (showRightPowerSignal(float)), this, SLOT (showRightPower(float)));
 
+        QObject::connect(&ctrlCommThread_, SIGNAL (sendLightMode(int)), this, SLOT (changeCam(int)));
+
         ctrlCommThread_.start();
 
 
-        camClient.connectToHost(QHostAddress("192.168.8.1"), 8083);
-        camClient.requestImage();
+        camClient_Front.connectToHost(QHostAddress("192.168.1.1"), 8080);
+        camClient_Back.connectToHost(QHostAddress("192.168.1.1"), 8081);
+        camClient_Front.requestImage();
+        camClient_Back.requestImage();
 
-        connect(&camClient, SIGNAL(newImageReady(QImage)), this, SLOT(showNewImage(QImage)));
+        camClient_Front.enableShow();
+        camClient_Back.disableShow();
+
+
+        connect(&camClient_Front, SIGNAL(newImageReady(QImage)), this, SLOT(showNewImage(QImage)));
+        connect(&camClient_Back, SIGNAL(newImageReady(QImage)), this, SLOT(showNewImage(QImage)));
 
 }
 
@@ -119,6 +129,21 @@ void Player::showRightPower(float x)
         ui->rightPowerLabel->setText(tmp);
 }
 
+void Player::changeCam(int mode)
+{
+        if (mode == 1) {
+                qDebug()<<"chanecam mode"<<"front ==================\n";
+                camClient_Front.enableShow();
+                camClient_Back.disableShow();
+        }
+        else if (mode == 2) {
+                qDebug()<<"chanecam mode"<<"back ==================\n";
+                camClient_Front.disableShow();
+                camClient_Back.enableShow();
+        }
+}
+
+
 //desctructor
 Player::~Player()
 {
@@ -141,4 +166,51 @@ void Player::change_Speed()
 void Player::showNewImage(QImage img)
 {
         ui->imgLabel->setPixmap(QPixmap::fromImage(img));
+}
+
+void Player::keyPressEvent(QKeyEvent *e)
+{
+        if (e->modifiers() == (Qt::ShiftModifier | Qt::ControlModifier) && e->key() == Qt::Key_S)
+        {
+                grabScreen();
+                //pressed
+        }
+}
+
+
+void Player::grabScreen()
+{
+        QScreen *screen = QGuiApplication::primaryScreen();
+        //    sprintf(buf, "./test/%04d.jpg", i+1);
+        //  screen->grabWindow(0).save(buf,"jpg");
+
+        QPixmap pix = screen->grabWindow(0);
+
+        QDateTime time = QDateTime::currentDateTime();
+        QString dateStr = time.toString("yyyy-MM-dd_hh:mm:ss");
+
+        QString filename = QFileDialog::getSaveFileName(this,
+                                                        tr("Save Image"),
+                                                        "/tmp/" + dateStr + "_",
+                                                        tr("*.jpg")); //选择路径
+
+        if(filename.isEmpty())
+        {
+                return;
+        }
+        else
+        {
+                if(!pix.save(filename, "jpg")) //保存图像
+                {
+                        QMessageBox::information(this,
+                                                 tr("Failed to save the image"),
+                                                 tr("保存图片失败!"));
+                        return;
+                }
+        }
+}
+
+void Player::recordScreen()
+{
+
 }

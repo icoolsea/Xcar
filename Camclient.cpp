@@ -3,6 +3,7 @@
 
 CamClient::CamClient(QObject *parent) : QObject(parent)
 {
+    showMode = false;
     connect(&tcpSocket, SIGNAL(readyRead()), this, SLOT(readImage()));
 }
 
@@ -41,10 +42,26 @@ void CamClient::readImage()
             return;
     }
 
-    QByteArray imageBuf = imageArray.mid(startPos, endPos-startPos+2);
-
-    image.loadFromData(imageBuf, "JPEG");
-    emit newImageReady(image);
+    if (isShow()) {
+        QByteArray imageBuf = imageArray.mid(startPos, endPos-startPos+2);
+        image.loadFromData(imageBuf, "JPEG");
+        emit newImageReady(image);
+    }
 
     imageArray.clear();
+}
+
+void CamClient::enableShow()
+{
+    showMode = true;
+}
+
+void CamClient::disableShow()
+{
+    showMode = false;
+}
+
+bool CamClient::isShow()
+{
+    return showMode;
 }

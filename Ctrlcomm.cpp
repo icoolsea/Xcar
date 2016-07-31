@@ -244,12 +244,16 @@ void CtrlComm::readyReadSlot()
         char speed2[3] = {(unsigned char)0xff, (unsigned char)0x06};
 
         char power[3] = {(unsigned char)0xff, (unsigned char)0x08};
+        char power_xxx[3] = {(unsigned char)0xff, (unsigned char)0x07};
 
         char tmperature1[3] = {(unsigned char)0xff, (unsigned char)0x0a};
         char tmperature2[3] = {(unsigned char)0xff, (unsigned char)0x0b};
 
         char angle1[3] = {(unsigned char)0xff, (unsigned char)0x0c};
         char angle2[3] = {(unsigned char)0xff, (unsigned char)0x0d};
+
+
+        char light[3] = {(unsigned char)0xff, (unsigned char)0x03};
 
 
         if (serialBuf.indexOf(speed1, 0) == 0 || serialBuf.indexOf(speed2, 0) == 0)
@@ -267,6 +271,11 @@ void CtrlComm::readyReadSlot()
         }
         else if (serialBuf.indexOf(angle2, 0) == 0)
                 emit showAngleSignal(0-value);
+        else if (serialBuf.indexOf(light, 0) == 0)
+                emit sendLightMode(serialBuf[4]);
+        else if (serialBuf.indexOf(power_xxx, 0) == 0) {
+                serial_->writeData(serialBuf.data(), 5);//write back to serial port
+        }
 
     //void showDistanceSignal(float x);
     //void showLeftPowerSignal(float x);

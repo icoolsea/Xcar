@@ -60,11 +60,19 @@ class Player : public QMainWindow
         QTimer testTimer;
 
         Ui::MainWindow *ui;
-        CamClient camClient;
+
+        int camMode;
+
+        CamClient camClient_Front;
+        CamClient camClient_Back;
 
 public:
         Player(QWidget *parent = 0);
         ~Player();
+
+protected:
+        void keyPressEvent(QKeyEvent *);
+        void grabScreen();
 
 
 public slots:
@@ -81,6 +89,7 @@ public slots:
 
         void showNewImage(QImage img);
 
+        void changeCam(int mode);
 };
 
 #endif

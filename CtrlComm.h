@@ -22,6 +22,8 @@ signals:
     void showLeftPowerSignal(float x);
     void showRightPowerSignal(float x);
 
+    void sendLightMode(int mode);
+
 
 protected:
     void run();

@@ -14,13 +14,20 @@ class CamClient : public QObject
     Q_OBJECT
 public:
     explicit CamClient(QObject *parent = 0);
+
     void connectToHost(QHostAddress addr, quint16 port);
     void requestImage(void);
+    void enableShow();
+    void disableShow();
 
-protected:
+private:
+    bool isShow();
+
     QTcpSocket tcpSocket;
     QByteArray imageArray;
     QImage image;
+
+    bool showMode;
 
 signals:
     void newImageReady(QImage img);
