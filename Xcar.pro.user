@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 3.5.1, 2016-07-31T19:18:14. -->
+<!-- Written by QtCreator 3.5.1, 2016-08-05T00:27:21. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -8,7 +8,7 @@
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
-  <value type="int">1</value>
+  <value type="int">0</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.EditorSettings</variable>
@@ -66,7 +66,7 @@
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Desktop Qt 5.5.1 GCC 32bit</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Desktop Qt 5.5.1 GCC 32bit</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">qt.55.gcc_kit</value>
-   <value type="int" key="ProjectExplorer.Target.ActiveBuildConfiguration">0</value>
+   <value type="int" key="ProjectExplorer.Target.ActiveBuildConfiguration">1</value>
    <value type="int" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
    <value type="int" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
@@ -267,7 +267,7 @@
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">cross</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">cross</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">{cdaeabbc-5d3b-4a00-81cb-911c1403675d}</value>
-   <value type="int" key="ProjectExplorer.Target.ActiveBuildConfiguration">0</value>
+   <value type="int" key="ProjectExplorer.Target.ActiveBuildConfiguration">1</value>
    <value type="int" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
    <value type="int" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
@@ -421,15 +421,18 @@
        <value type="QString">/tmp/build-Xcar-cross-Debug/xcar</value>
        <value type="QString">/tmp/build-Xcar-cross-Debug/xcar</value>
        <value type="QString">/tmp/build-Xcar-cross-Debug/xcar</value>
+       <value type="QString">/tmp/build-Xcar-cross-Debug/xcar</value>
       </valuelist>
       <valuelist type="QVariantList" key="Qt4ProjectManager.MaemoRunConfiguration.LastDeployedHosts">
        <value type="QString">192.168.8.243</value>
-       <value type="QString">192.168.1.243</value>
-       <value type="QString">115.196.218.2</value>
-       <value type="QString">115.206.126.223</value>
        <value type="QString">115.196.223.113</value>
+       <value type="QString">115.206.126.223</value>
+       <value type="QString">192.168.1.243</value>
+       <value type="QString">192.168.1.2</value>
+       <value type="QString">115.196.218.2</value>
       </valuelist>
       <valuelist type="QVariantList" key="Qt4ProjectManager.MaemoRunConfiguration.LastDeployedRemotePaths">
+       <value type="QString">/home/pi</value>
        <value type="QString">/home/pi</value>
        <value type="QString">/home/pi</value>
        <value type="QString">/home/pi</value>
@@ -442,13 +445,15 @@
        <value type="QString">/home/jon/raspi/sysroot</value>
        <value type="QString">/home/jon/raspi/sysroot</value>
        <value type="QString">/home/jon/raspi/sysroot</value>
+       <value type="QString">/home/jon/raspi/sysroot</value>
       </valuelist>
       <valuelist type="QVariantList" key="Qt4ProjectManager.MaemoRunConfiguration.LastDeployedTimes">
        <value type="QDateTime">2016-07-23T15:26:54</value>
-       <value type="QDateTime">2016-07-24T23:44:45</value>
-       <value type="QDateTime">2016-07-11T00:10:33</value>
-       <value type="QDateTime">2016-07-06T21:49:16</value>
        <value type="QDateTime">2016-07-10T23:46:26</value>
+       <value type="QDateTime">2016-07-06T21:49:16</value>
+       <value type="QDateTime">2016-07-24T23:44:45</value>
+       <value type="QDateTime">2016-07-31T22:36:14</value>
+       <value type="QDateTime">2016-07-11T00:10:33</value>
       </valuelist>
       <value type="bool" key="RemoteLinux.GenericDirectUploadStep.IgnoreMissingFiles">false</value>
       <value type="bool" key="RemoteLinux.GenericDirectUploadStep.Incremental">true</value>

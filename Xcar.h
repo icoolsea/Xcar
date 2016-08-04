@@ -68,6 +68,10 @@ class Player : public QMainWindow
         CamClient camClient_Front;
         CamClient camClient_Back;
 
+        QTimer *poller;
+        int fifo_fd;
+        bool isStopRecord;
+
 public:
         Player(QWidget *parent = 0);
         ~Player();
@@ -94,6 +98,11 @@ public slots:
         void showNewImage(QImage img);
 
         void changeCam(int mode);
+
+
+        void recordScreen();
+
+
 signals:
         void stopRecordSignal();
 };

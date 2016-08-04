@@ -28,6 +28,7 @@ private:
     bool isStoped();
 
     bool isStopRecord;
+    int  fifo_fd;
 
 
 };

@@ -5,7 +5,9 @@
 #include <QSettings>
 #include <QByteArray>
 
-static const int timeOut = 50;
+#include <time.h>
+
+static const int timeOut = 10;
 
 
 CtrlComm::CtrlComm() : isConnected_(false)
@@ -55,10 +57,12 @@ void CtrlComm::run() {
 
         while (true) {
 
+
 #if 1
                 if (!serial_->isOpen())
                 {
                     sleep(1);
+                //    emit sendToServerSignal(tmpdata);
                     LOG_ERROR<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
                     continue;
                 }
@@ -67,7 +71,7 @@ void CtrlComm::run() {
                 int count = serial_->readData((char *)tmp, 5, timeOut);
                 if (count <= 0)
                 {
-              //      emit sendToServerSignal(tmpdata);
+            //        emit sendToServerSignal(tmpdata);
                         continue;
 
                 }
@@ -171,7 +175,12 @@ int CtrlComm::connectToServer(const char * ip, int port)
 
         carSocket_->abort();
         carSocket_->connectToHost(ip, port);
-        carSocket_->waitForConnected(timeOut*100);
+
+        QVariant vvv(1);
+        carSocket_->setSocketOption(QAbstractSocket::LowDelayOption, vvv);
+        carSocket_->setSocketOption(QAbstractSocket::SendBufferSizeSocketOption, 0);
+
+        carSocket_->waitForConnected(timeOut*1000);
 
         LOG_DEBUG<<"connecting to server..."<<endl;
 
@@ -179,9 +188,15 @@ int CtrlComm::connectToServer(const char * ip, int port)
 
 int CtrlComm::sendToServer(QByteArray data)
 {
-        //carSocket_->write(&tmp, 1);
+
         carSocket_->write(data, 5);
+        carSocket_->flush();
         carSocket_->waitForBytesWritten(timeOut);
+
+     //   double time_Start = (double)clock(); //开始时间
+       // usleep(100);
+       // double time_Finish = (double)clock(); //结束时间
+        //LOG_DEBUG<<"operate time: "<<(time_Finish-time_Start);
 
         //        LOG_DEBUG<<"send msg to server"<<data<<endl;
 

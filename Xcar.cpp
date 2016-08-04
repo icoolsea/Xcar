@@ -9,8 +9,14 @@
 #include "CtrlComm.h"
 #include "RecordScreen.h"
 
+#include <unistd.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <sys/types.h>
 #include <sys/stat.h>
-#include "unistd.h"
+#include <stdio.h>
+#include <string.h>
 
 
 //#include <QX11EmbedContainer>
@@ -23,6 +29,7 @@
 #include <QDial>
 #include <QLabel>
 #include <QThread>
+#include <QProcess>
 
 
 
@@ -30,6 +37,7 @@ Player::Player(QWidget *parent)
         :QMainWindow(parent),
           ui(new Ui::MainWindow)
 {
+    isStopRecord = true;
         ui->setupUi(this);
         camMode = 1;
 
@@ -69,8 +77,6 @@ Player::Player(QWidget *parent)
         ui->centralWidget->setAutoFillBackground(true);
 
 
-        connect(&testTimer,SIGNAL(timeout()),this,SLOT(change_Speed()));
-        testTimer.start(10);
 
 
         //QObject::connect(&thread_, SIGNAL (aSignal(int)), this, SLOT (showSpeed(int)));
@@ -100,6 +106,14 @@ Player::Player(QWidget *parent)
 
         connect(&camClient_Front, SIGNAL(newImageReady(QImage)), this, SLOT(showNewImage(QImage)));
         connect(&camClient_Back, SIGNAL(newImageReady(QImage)), this, SLOT(showNewImage(QImage)));
+
+        poller=new QTimer(this);
+        connect(poller, SIGNAL(timeout()), this, SLOT(recordScreen()));
+
+        connect(poller,SIGNAL(timeout()),this,SLOT(change_Speed()));
+
+        poller->start(40); //start timer to trigger every 100 ms the updateInterface slot
+
 
 }
 
@@ -147,7 +161,7 @@ void Player::changeCam(int mode)
                 camClient_Back.enableShow();
         }
 
-                qDebug()<<"chanecam mode"<<"back ==================\n"<<mode;
+        qDebug()<<"chanecam mode"<<"back ==================\n"<<mode;
 
 }
 
@@ -178,15 +192,15 @@ void Player::showNewImage(QImage img)
 
 void Player::keyPressEvent(QKeyEvent *e)
 {
-        if (e->modifiers() == (Qt::AltModifier | Qt::ControlModifier) && e->key() == Qt::Key_S)
+        if (e->modifiers() == (Qt::ShiftModifier | Qt::ControlModifier) && e->key() == Qt::Key_S)
         {
                 grabScreen();
         }
-        else if (e->modifiers() == (Qt::AltModifier | Qt::ControlModifier) && e->key() == Qt::Key_Space)
+        else if (e->modifiers() == (Qt::ShiftModifier | Qt::ControlModifier) && e->key() == Qt::Key_Z)
         {
                 startRecordScreen();
         }
-        else if (e->modifiers() == (Qt::AltModifier | Qt::ControlModifier) && e->key() == Qt::Key_Enter)
+        else if (e->modifiers() == (Qt::ShiftModifier | Qt::ControlModifier) && e->key() == Qt::Key_X)
         {
                 stopRecordScreen();
         }
@@ -227,10 +241,53 @@ void Player::grabScreen()
 
 void Player::startRecordScreen()
 {
-    recordScreenThread_.start();
-}
+
+        if(access(FIFO_NAME, F_OK) ==  -1)
+        {
+                fifo_fd = mkfifo(FIFO_NAME, 0777);
+                if(fifo_fd < 0)
+                {
+                }
+        }
+        //   recordScreenThread_.start();
+        fifo_fd = open(FIFO_NAME, O_WRONLY);
+
+
+        isStopRecord = false;
+
+    QString program = "/usr/bin/ffmpeg";
+        QStringList arguments;
+        arguments <<"-y"<<"-i"<<"/tmp/screen_pipe"<<"/tmp/output111.mp4";
+        // ffmpeg -threads 2 -y  -i screen_pipe   ./output.mp4
+
+        QProcess *myProcess = new QProcess();
+        myProcess->startDetached(program, arguments);
+ }
 
 void Player::stopRecordScreen()
 {
-    emit stopRecordSignal();
+        //    emit stopRecordSignal();
+        isStopRecord = true;
+        ::close(fifo_fd);
+
+        qDebug()<<"=======================ooooooooooooooooooooooooooo\n";
+}
+
+void Player::recordScreen()
+{
+        if (isStopRecord)
+                return;
+
+        QScreen *screen = QGuiApplication::primaryScreen();
+
+        QPixmap pix = screen->grabWindow(0);
+
+        QByteArray ba;
+        QBuffer buf(&ba);
+        pix.save(&buf, "jpg");
+
+        size_t num =write(fifo_fd, ba, ba.size());
+        if (num == -1)
+        {
+        }
 }
