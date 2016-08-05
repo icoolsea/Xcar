@@ -112,8 +112,7 @@ Player::Player(QWidget *parent)
 
         connect(poller,SIGNAL(timeout()),this,SLOT(change_Speed()));
 
-        poller->start(40); //start timer to trigger every 100 ms the updateInterface slot
-
+        poller->start(200); //start timer to trigger every 100 ms the updateInterface slot
 
 }
 
@@ -188,6 +187,21 @@ void Player::change_Speed()
 void Player::showNewImage(QImage img)
 {
         ui->imgLabel->setPixmap(QPixmap::fromImage(img));
+
+//        if (isStopRecord)
+//                return;
+
+//        QPixmap pix = QPixmap::fromImage(img);
+
+//        QByteArray ba;
+//        QBuffer buf(&ba);
+//        pix.save(&buf, "jpg");
+
+//        size_t num =write(fifo_fd, ba, ba.size());
+//        if (num == -1)
+//        {
+//        }
+
 }
 
 void Player::keyPressEvent(QKeyEvent *e)
@@ -242,39 +256,73 @@ void Player::grabScreen()
 void Player::startRecordScreen()
 {
 
-        if(access(FIFO_NAME, F_OK) ==  -1)
-        {
-                fifo_fd = mkfifo(FIFO_NAME, 0777);
-                if(fifo_fd < 0)
-                {
-                }
-        }
-        //   recordScreenThread_.start();
-        fifo_fd = open(FIFO_NAME, O_WRONLY);
+    if (!isStopRecord)
+        return;
 
+//        if(access(FIFO_NAME, F_OK) ==  -1)
+//        {
+//                fifo_fd = mkfifo(FIFO_NAME, 0777);
+//                if(fifo_fd < 0)
+//                {
+//                }
+//        }
 
-        isStopRecord = false;
-
-    QString program = "/usr/bin/ffmpeg";
-        QStringList arguments;
-        arguments <<"-y"<<"-i"<<"/tmp/screen_pipe"<<"/tmp/output111.mp4";
-        // ffmpeg -threads 2 -y  -i screen_pipe   ./output.mp4
 
         QProcess *myProcess = new QProcess();
-        myProcess->startDetached(program, arguments);
+     //   myProcess->startDetached("ffmpeg -f x11grab  -s 1366x768 -y -i :0.0+0+0 /tmp/output.mp4");
+      //  myProcess->startDetached("ffmpeg -r 25 -y -i /tmp/screen_pipe /tmp/output.mp4");
+       // myProcess->startDetached("avconv -f x11grab -s cif -y -r 25 -i :0.0 /tmp/output.mp4");
+        //ffmpeg  -f fbdev -y -r 25 -i /dev/fb0  /tmp/output.mp4
+        myProcess->startDetached("ffmpeg  -f fbdev -y -r 25 -i /dev/fb0  /tmp/output.mp4");
+
+    //  fifo_fd = open(FIFO_NAME, O_WRONLY);
+      isStopRecord = false;
  }
 
 void Player::stopRecordScreen()
 {
-        //    emit stopRecordSignal();
-        isStopRecord = true;
-        ::close(fifo_fd);
+    if (isStopRecord)
+        return;
 
-        qDebug()<<"=======================ooooooooooooooooooooooooooo\n";
+    QString KillStr = "killall -3 avconf";
+    QProcess *Process = new QProcess();
+    Process->startDetached(KillStr);
+
+//        isStopRecord = true;
+//        ::close(fifo_fd);
+
+
+
+        QDateTime time = QDateTime::currentDateTime();
+        QString dateStr = time.toString("yyyy-MM-dd_hh:mm:ss");
+
+        QString filename = QFileDialog::getSaveFileName(this,
+                                                        tr("Save video"),
+                                                        "/tmp/" + dateStr + "_",
+                                                        tr("*.mp4")); //选择路径
+        if(filename.isEmpty())
+        {
+            QFile::remove("/tmp/output.mp4");
+                return;
+        }
+        else
+        {
+            if (!QFile::rename("/tmp/output.mp4", filename+".mp4"))
+                {
+                      QMessageBox::information(this,
+                                               tr("Failed to save the image"),
+                                                tr("保存视频失败!"));
+                       return;
+               }
+                QMessageBox::information(this,
+                                         tr("Successed to save the video"),
+                                         tr("保存视频成功!"));
+        }
 }
 
 void Player::recordScreen()
 {
+    return;
         if (isStopRecord)
                 return;
 
