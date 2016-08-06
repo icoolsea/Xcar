@@ -6,7 +6,7 @@
 
 class SerialThread:QObject
 {
-Q_OBJECT
+    Q_OBJECT
 signals:
 
 protected:

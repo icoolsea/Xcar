@@ -1,16 +1,13 @@
 #ifndef CAMCLIENT_H
 #define CAMCLIENT_H
 
-#include <QObject>
-#include <QHostAddress>
-#include <QTcpSocket>
 #include <QByteArray>
+#include <QHostAddress>
 #include <QImage>
+#include <QObject>
+#include <QTcpSocket>
 
-
-
-class CamClient : public QObject
-{
+class CamClient : public QObject {
     Q_OBJECT
 public:
     explicit CamClient(QObject *parent = 0);

@@ -4,7 +4,6 @@
 
 #include "Camclient.h"
 
-
 #ifndef XCAR_H
 #define XCAR_H
 
@@ -19,92 +18,89 @@
 //#include <QX11EmbedContainer>
 #include <QLabel>
 #include <QTimer>
+#include <QtNetwork>
 
 class QVBoxLayout;
 class QPushButton;
 class QFrame;
 class QSlider;
 
-
 #define POSITION_RESOLUTION 10000
 
-class Thread : public QThread
-{
-        Q_OBJECT
+class Thread : public QThread {
+    Q_OBJECT
 signals:
-        void aSignal(int value);
+    void aSignal(int value);
+
 protected:
-        void run() {
-                //  emit aSignal();
+    void run() {
+        //  emit aSignal();
 
-                while (true) {
-                        sleep(1);
+        while (true) {
+            sleep(1);
 
-                        qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
-                        int random = qrand() % 100;
-                  //      emit aSignal(random);
-                }
+            qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
+            int random = qrand() % 100;
+            //      emit aSignal(random);
         }
+    }
 };
 
+class Player : public QMainWindow {
+    Q_OBJECT
 
-class Player : public QMainWindow
-{
-        Q_OBJECT
+    Thread thread_;
+    CtrlComm ctrlCommThread_;
+    RecordScreen recordScreenThread_;
 
-        Thread thread_;
-        CtrlComm ctrlCommThread_;
-        RecordScreen recordScreenThread_;
+    Form_KM *carSpeed_;
+    Form_KM *servoAngle_;
 
-        Form_KM *carSpeed_;
-        Form_KM *servoAngle_;
+    QTimer testTimer;
 
-        QTimer testTimer;
+    Ui::MainWindow *ui;
 
-        Ui::MainWindow *ui;
+    int camMode;
 
-        int camMode;
+    CamClient camClient_Front;
+    CamClient camClient_Back;
 
-        CamClient camClient_Front;
-        CamClient camClient_Back;
+    QTimer *poller;
+    int fifo_fd;
+    bool isStopRecord;
 
-        QTimer *poller;
-        int fifo_fd;
-        bool isStopRecord;
+    QUdpSocket *sender;
 
 public:
-        Player(QWidget *parent = 0);
-        ~Player();
+    Player(QWidget *parent = 0);
+    ~Player();
 
 protected:
-        void keyPressEvent(QKeyEvent *);
-        void grabScreen();
-        void startRecordScreen();
-        void stopRecordScreen();
-
+    void keyPressEvent(QKeyEvent *);
+    void grabScreen();
+    void startRecordScreen();
+    void stopRecordScreen();
 
 public slots:
-        void playFile(QString file);
+    void playFile(QString file);
 
-        void showSpeed(float value);
-        void showAngleSignal(float x);
-        void showTemperature(float x);
+    void showSpeed(float value);
+    void showAngleSignal(float x);
+    void showTemperature(float x);
 
-        void showLeftPower(float x);
-        void showRightPower(float x);
+    void showLeftPower(float x);
+    void showRightPower(float x);
 
-        void change_Speed();
+    void change_Speed();
 
-        void showNewImage(QImage img);
+    void showNewImage(QImage img);
 
-        void changeCam(int mode);
+    void changeCam(int mode);
 
-
-        void recordScreen();
-
+    void recordScreen();
 
 signals:
-        void stopRecordSignal();
+    void stopRecordSignal();
 };
 
 #endif
