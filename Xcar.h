@@ -66,6 +66,8 @@ class Player : public QMainWindow {
         CamClient camClient_Back;
 
         QTimer *poller;
+        QTimer *recording;
+        bool recordStatus;
         int fifo_fd;
         bool isStopRecord;
 
@@ -92,8 +94,10 @@ public slots:
         void showRightPower(int value);
 
         void change_Speed();
+        void change_recordStatus();
 
         void showNewImage(QImage img);
+        void showNewImage_new(QByteArray ba);
 
         void changeCam(int mode);
 

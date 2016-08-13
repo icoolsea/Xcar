@@ -774,6 +774,61 @@
      <string>箱体电压(V):</string>
     </property>
    </widget>
+   <widget class="QLabel" name="recordstatus">
+    <property name="geometry">
+     <rect>
+      <x>296</x>
+      <y>0</y>
+      <width>48</width>
+      <height>48</height>
+     </rect>
+    </property>
+    <property name="palette">
+     <palette>
+      <active>
+       <colorrole role="WindowText">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>244</red>
+          <green>28</green>
+          <blue>28</blue>
+         </color>
+        </brush>
+       </colorrole>
+      </active>
+      <inactive>
+       <colorrole role="WindowText">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>244</red>
+          <green>28</green>
+          <blue>28</blue>
+         </color>
+        </brush>
+       </colorrole>
+      </inactive>
+      <disabled>
+       <colorrole role="WindowText">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>159</red>
+          <green>158</green>
+          <blue>158</blue>
+         </color>
+        </brush>
+       </colorrole>
+      </disabled>
+     </palette>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

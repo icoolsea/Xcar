@@ -28,6 +28,7 @@ private:
 
 signals:
         void newImageReady(QImage img);
+        void newImageReady_new(QByteArray img);
 
 public slots:
         void readImage();

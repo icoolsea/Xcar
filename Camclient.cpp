@@ -37,8 +37,9 @@ void CamClient::readImage() {
 
         if (isShow()) {
                 QByteArray imageBuf = imageArray.mid(startPos, endPos - startPos + 2);
-                image.loadFromData(imageBuf, "JPEG");
-                emit newImageReady(image);
+                //image.loadFromData(imageBuf, "JPEG");
+                //emit newImageReady(image);
+                emit newImageReady_new(imageBuf);
         }
 
         imageArray.clear();

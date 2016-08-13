@@ -103,7 +103,7 @@ void CtrlComm::run() {
 
                 if (endPos - startPos == 1) {
                         serialArray_.clear();
-                        LOG_ERROR << "3 not find data\n ";
+                        //TODO !!! LOG_ERROR << "3 not find data\n ";
                         continue;
                 }
 

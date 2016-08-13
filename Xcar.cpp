@@ -37,6 +37,12 @@ Player::Player(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
         ui->setupUi(this);
         camMode = 1;
 
+        QImage img;
+        img.load("./record.png");
+        QPixmap pix = QPixmap::fromImage(img);
+        ui->recordstatus->setPixmap(pix);
+        ui->recordstatus->hide();
+
         //    QLabel *carAngle = new QLabel("车体角度");
         carSpeed_ = new Form_KM(this);
 
@@ -111,18 +117,26 @@ Player::Player(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
         camClient_Front.enableShow();
         camClient_Back.disableShow();
-
+#if 0
         connect(&camClient_Front, SIGNAL(newImageReady(QImage)), this,
                 SLOT(showNewImage(QImage)));
         connect(&camClient_Back, SIGNAL(newImageReady(QImage)), this,
                 SLOT(showNewImage(QImage)));
+#endif
+        connect(&camClient_Front, SIGNAL(newImageReady_new(QByteArray)), this,
+                SLOT(showNewImage_new(QByteArray)));
+        connect(&camClient_Back, SIGNAL(newImageReady_new(QByteArray)), this,
+                SLOT(showNewImage_new(QByteArray)));
 
         poller = new QTimer(this);
+        recording = new QTimer(this);
         //  connect(poller, SIGNAL(timeout()), this, SLOT(recordScreen()));
 
         connect(poller, SIGNAL(timeout()), this, SLOT(change_Speed()));
+        connect(recording, SIGNAL(timeout()), this, SLOT(change_recordStatus()));
 
         poller->start(100);
+        recording->start(600);
 }
 
 void Player::showSpeed(int x) {
@@ -164,13 +178,9 @@ void Player::showRightPower(int p) {
 
 void Player::changeCam(int mode) {
         if (mode == 1) {
-                qDebug() << "chanecam mode "
-                         << "front ==================\n";
                 camClient_Front.enableShow();
                 camClient_Back.disableShow();
         } else if (mode == 2) {
-                qDebug() << "chanecam mode "
-                         << "back ==================\n";
                 camClient_Front.disableShow();
                 camClient_Back.enableShow();
         }
@@ -190,6 +200,21 @@ void Player::change_Speed() {
         servoAngle_->change_Speed(temp-10);
 }
 
+void Player::change_recordStatus() {
+
+        if (isStopRecord)
+                return;
+
+        if (recordStatus) {
+                ui->recordstatus->show();
+                recordStatus = false;
+        }
+        else {
+                ui->recordstatus->hide();
+                recordStatus = true;
+        }
+}
+
 void Player::showNewImage(QImage img) {
         ui->imgLabel->setPixmap(QPixmap::fromImage(img));
 
@@ -204,11 +229,10 @@ void Player::showNewImage(QImage img) {
 
         QHostAddress serverAddress = QHostAddress("127.0.0.1");
         int len = sender->writeDatagram(ba.data(), ba.size(), serverAddress, 8888);
-        sender->flush();
+       // sender->flush();
 
-        double time_Finish = (double)clock(); //结束时间
-        //   qDebug()<<"=================================================================
-        //   size = "<<ba.size()<<":"<<len<<":"<<time_Finish;
+       // double time_Finish = (double)clock(); //结束时间
+        //   qDebug()<<"=================================================================size = "<<ba.size()<<":"<<len<<":"<<time_Finish;
 
 #if 0
         QPixmap pix = QPixmap::fromImage(img);
@@ -286,12 +310,13 @@ void Player::startRecordScreen() {
         // myProcess->startDetached("ffmpeg  -f fbdev -y -r 25 -i /dev/fb0
         // /tmp/output.mp4"); //only linux fb
         myProcess->startDetached(
-                                "ffmpeg -y -i udp://127.0.0.1:8888 -r 8 /tmp/output.mp4");
+                                "ffmpeg -y -i udp://127.0.0.1:8888  /tmp/output.mp4");
 
 #if 0
         fifo_fd = open(FIFO_NAME, O_WRONLY);
 #endif
         isStopRecord = false;
+        ui->recordstatus->show();
 }
 
 void Player::stopRecordScreen() {
@@ -303,6 +328,8 @@ void Player::stopRecordScreen() {
         Process->startDetached(KillStr);
 
         isStopRecord = true;
+        ui->recordstatus->hide();
+
 
 #if 0
         ::close(fifo_fd);
@@ -347,4 +374,22 @@ void Player::recordScreen() {
         {
         }
 #endif
+}
+
+void Player::showNewImage_new(QByteArray ba) {
+
+
+        QImage img;
+        img.loadFromData(ba, "jpg");
+        QPixmap pix = QPixmap::fromImage(img);
+        ui->imgLabel->setPixmap(pix);
+
+        if (isStopRecord)
+                return;
+
+     //   QBuffer buf(&ba);
+       // pix.save(&buf, "jpg");
+
+        QHostAddress serverAddress = QHostAddress("127.0.0.1");
+        int len = sender->writeDatagram(ba.data(), ba.size(), serverAddress, 8888);
 }
