@@ -55,7 +55,7 @@ Player::Player(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
         QGridLayout *newLayout = new QGridLayout;
         newLayout->addWidget(carSpeed_, 0, 0);
         newLayout->addWidget(servoAngle_, 0, 1);
-        newLayout->setSpacing(360);
+        newLayout->setSpacing(340);
 
         newLayout->setContentsMargins(10, 10, 0, 0);
 
@@ -127,15 +127,15 @@ Player::Player(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
 void Player::showSpeed(int x) {
 
-        QString y = QString::number(x/100.0, 'f', 1);
-        QString str = QString("速度(m/s): %1").arg(y);
+        QString y = QString::number(x/1.0, 'f', 1);
+        QString str = QString("%1 (m/s)").arg(y);
         ui->speedLabel->setText(str);
 }
 
 void Player::showAngleSignal(int x) {
 
-        QString y = QString::number(x/100.0, 'f', 1);
-        QString str = QString("角度(°): %1").arg(y);
+        QString y = QString::number(x/1.0, 'f', 1);
+        QString str = QString("%1 (°)").arg(y);
         ui->distanceLabel->setText(str);
 }
 
@@ -187,6 +187,7 @@ void Player::change_Speed() {
         if (temp >= 200)
             temp = 0;
         carSpeed_->change_Speed(temp);
+        servoAngle_->change_Speed(temp-10);
 }
 
 void Player::showNewImage(QImage img) {
