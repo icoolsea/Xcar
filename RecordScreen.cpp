@@ -27,34 +27,34 @@ void RecordScreen::run() { recordScreen(); }
 
 // ffmpeg -threads 2 -y -r 30 -i %04d.jpg   ./output.mp4
 void RecordScreen::recordScreen() {
-    FILE *file = NULL;
-    int fifo_fd;
+        FILE *file = NULL;
+        int fifo_fd;
 
-    if (access(FIFO_NAME, F_OK) == -1) {
-        fifo_fd = mkfifo(FIFO_NAME, 0777);
-        if (fifo_fd < 0) {
-        }
-    }
-
-    QScreen *screen = QGuiApplication::primaryScreen();
-
-    while (!isStoped()) {
-        QPixmap pix = screen->grabWindow(0);
-
-        QByteArray ba;
-        QBuffer buf(&ba);
-        pix.save(&buf, "jpg");
-
-        fifo_fd = open(FIFO_NAME, O_WRONLY);
-        //                size_t num =write(fifo_fd, ba, ba.size());
-        size_t num = write(fifo_fd, ba, ba.size());
-        if (num == -1) {
+        if (access(FIFO_NAME, F_OK) == -1) {
+                fifo_fd = mkfifo(FIFO_NAME, 0777);
+                if (fifo_fd < 0) {
+                }
         }
 
-        usleep(40 * 1000);
-    }
+        QScreen *screen = QGuiApplication::primaryScreen();
 
-    ::close(fifo_fd);
+        while (!isStoped()) {
+                QPixmap pix = screen->grabWindow(0);
+
+                QByteArray ba;
+                QBuffer buf(&ba);
+                pix.save(&buf, "jpg");
+
+                fifo_fd = open(FIFO_NAME, O_WRONLY);
+                //                size_t num =write(fifo_fd, ba, ba.size());
+                size_t num = write(fifo_fd, ba, ba.size());
+                if (num == -1) {
+                }
+
+                usleep(40 * 1000);
+        }
+
+        ::close(fifo_fd);
 }
 
 void RecordScreen::stopRecord() { isStopRecord = true; }

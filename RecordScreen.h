@@ -6,23 +6,23 @@
 #define FIFO_NAME "/tmp/screen_pipe"
 
 class RecordScreen : public QThread {
-    Q_OBJECT
+        Q_OBJECT
 protected:
-    void run();
+        void run();
 
 public:
-    explicit RecordScreen();
-    ~RecordScreen();
+        explicit RecordScreen();
+        ~RecordScreen();
 
 public slots:
-    void stopRecord();
+        void stopRecord();
 
 private:
-    void recordScreen();
-    bool isStoped();
+        void recordScreen();
+        bool isStoped();
 
-    bool isStopRecord;
-    int fifo_fd;
+        bool isStopRecord;
+        int fifo_fd;
 };
 
 #endif // RECORDSCREEN

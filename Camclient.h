@@ -8,29 +8,29 @@
 #include <QTcpSocket>
 
 class CamClient : public QObject {
-    Q_OBJECT
+        Q_OBJECT
 public:
-    explicit CamClient(QObject *parent = 0);
+        explicit CamClient(QObject *parent = 0);
 
-    void connectToHost(QHostAddress addr, quint16 port);
-    void requestImage(void);
-    void enableShow();
-    void disableShow();
+        void connectToHost(QHostAddress addr, quint16 port);
+        void requestImage(void);
+        void enableShow();
+        void disableShow();
 
 private:
-    bool isShow();
+        bool isShow();
 
-    QTcpSocket tcpSocket;
-    QByteArray imageArray;
-    QImage image;
+        QTcpSocket tcpSocket;
+        QByteArray imageArray;
+        QImage image;
 
-    bool showMode;
+        bool showMode;
 
 signals:
-    void newImageReady(QImage img);
+        void newImageReady(QImage img);
 
 public slots:
-    void readImage();
+        void readImage();
 };
 
 #endif // CAMCLIENT_H

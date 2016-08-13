@@ -8,49 +8,49 @@
 #include "SerialThread.h"
 
 class CtrlComm : public QThread {
-    Q_OBJECT
+        Q_OBJECT
 signals:
-    void sSignal(char value);
-    void sendToServerSignal(QByteArray);
+        void sSignal(char value);
+        void sendToServerSignal(QByteArray);
 
-    void showSpeedSignal(float value);
-    void showAngleSignal(float x);
-    void showTemperatureSignal(float x);
+        void showSpeedSignal(int value);
+        void showAngleSignal(int value);
+        void showTemperatureSignal(int value);
 
-    void showLeftPowerSignal(float x);
-    void showRightPowerSignal(float x);
+        void showLeftPowerSignal(int value);
+        void showRightPowerSignal(int value);
 
-    void sendLightMode(int mode);
+        void sendLightMode(int mode);
 
 protected:
-    void run();
+        void run();
 
 public:
-    explicit CtrlComm();
-    ~CtrlComm();
+        explicit CtrlComm();
+        ~CtrlComm();
 
-    void openComm();
+        void openComm();
 
-    // may never be called
-    void closeComm();
+        // may never be called
+        void closeComm();
 
 private slots:
-    void connectedSlot();
-    void disconnectedSlot();
-    void readyReadSlot();
-    void errorSlot(QAbstractSocket::SocketError);
+        void connectedSlot();
+        void disconnectedSlot();
+        void readyReadSlot();
+        void errorSlot(QAbstractSocket::SocketError);
 
-    int sendToServer(QByteArray data);
+        int sendToServer(QByteArray data);
 
 private:
-    int connectToServer(const char *ip, int port);
+        int connectToServer(const char *ip, int port);
 
-    QTcpSocket *carSocket_;
-    bool isConnected_;
+        QTcpSocket *carSocket_;
+        bool isConnected_;
 
-    SerialThread *serial_;
-    QByteArray serialArray_;
-    QByteArray socketArray_;
+        SerialThread *serial_;
+        QByteArray serialArray_;
+        QByteArray socketArray_;
 };
 
 #endif // CTRL
